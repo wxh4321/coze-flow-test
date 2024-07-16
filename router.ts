@@ -7,6 +7,10 @@ export const routes: RouterOptions['routes'] = [
     redirect: '/overview',
   },
   {
+    path:'/work_flow',
+    component: () => import('./src/WorkFlow/WorkFlow.vue'),
+  },
+  {
     path: '/basic',
     component: () => import('./src/Basic/Basic.vue'),
   },

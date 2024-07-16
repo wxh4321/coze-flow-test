@@ -3,6 +3,6 @@ import Header from './Header.vue'
 </script>
 
 <template>
-  <Header />
+  <!-- <Header /> -->
   <router-view />
 </template>
