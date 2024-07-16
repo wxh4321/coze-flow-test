@@ -1,0 +1,19 @@
+{
+  "extends": "@tooling/tsconfig/base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "declaration": false,
+    "resolveJsonModule": true,
+    "emitDeclarationOnly": false,
+    "allowJs": true,
+    "types": [
+      "vite/client"
+    ]
+  },
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}
