@@ -13,7 +13,7 @@ function onChange(event: Event) {
   const target = evt.target as HTMLInputElement
 
   const value = Number.parseFloat(target.value)
-
+  console.log('onChange ', value);
   if (!Number.isNaN(value)) {
     updateNodeData(props.id, { value })
   }
