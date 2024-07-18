@@ -1,0 +1,25 @@
+export const startNodeParams = [
+    {
+        id:1,
+        list:[
+            {type:'input',value:'BOT_USER_INPUT',placeholder:'',warning:'',disabled:true},
+            {
+                type:'select',
+                value:'String',
+                options:[
+                    {label:'String',value:'String'},
+                    {label:'Integer',value:'Integer'}
+                ],
+                placeholder:'',
+                warning:'',
+                disabled:true
+            },
+            {
+                type:'textarea',value:'用户本轮对话输入内容',placeholder:'',warning:'',disabled:true,
+                maxlength:1000,    
+            },
+            {type:'checkbox',value:'',selected:true,placeholder:'',warning:'',disabled:true},
+            {type:'delete-icon',disabled:true}
+        ],
+    }
+];

@@ -9,7 +9,6 @@ const labels = ref([
 const showSaveResult = ref(false);
 const emit = defineEmits(['clickResult', 'tryRun', 'submitProject']);
 
-
 const goBack = () => {
     window.history.back();
 }
@@ -27,7 +26,7 @@ const submitProject = () => {
 <template>
     <div class="workflow-header-wrapper">
         <el-button :icon="ArrowLeft" class="w-h-left-icon" @click="goBack" />
-        <img src="./images/workflow.png" alt="w-h-title-icon" class="w-h-title-icon" />
+        <img src="./images/icon-workflow.png" alt="w-h-title-icon" class="w-h-title-icon" />
         <div class="workflow-flex">
             <div class="w-h-title">
                 <span class="w-h-t-text">测试</span>
@@ -70,6 +69,7 @@ const submitProject = () => {
 .w-h-r-button{
     background-color: rgb(78, 64, 229);
     border-radius: 8px;
+    border: 1px solid transparent;
 }
 
 .w-h-r-text {

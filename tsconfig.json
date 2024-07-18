@@ -1,5 +1,4 @@
 {
-  "extends": "@tooling/tsconfig/base",
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true,

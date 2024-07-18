@@ -20,8 +20,6 @@
     "pinia": "^2.1.7"
   },
   "devDependencies": {
-    "@tooling/eslint-config": "workspace:*",
-    "@tooling/tsconfig": "workspace:*",
     "@vitejs/plugin-vue": "^4.4.0",
     "sass": "^1.69.5",
     "unplugin-auto-import": "^0.16.6",

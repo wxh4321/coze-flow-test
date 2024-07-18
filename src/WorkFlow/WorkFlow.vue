@@ -1,19 +1,26 @@
 <script lang="ts" setup>
+interface inputDataProp {
+    [key:string]:any;
+}
 import Header from './Header.vue'
+import Models from './Models.vue'
+import VueFlow from './VueFlow.vue'
+import RunResult from './basic/RunResult.vue';
+
 import {
-    ArrowLeftBold,
-    ArrowRightBold,
-    ArrowRight,
-    ArrowLeft
+    ArrowLeftBold
 } from '@element-plus/icons-vue'
 import WorkFlowRunResultIcon from './icons/WorkFlowRunResultIcon.vue';
+import RunIcon from './icons/RunIcon.vue';
+import MenuIcon from './icons/MenuIcon.vue';
 import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCLoseIcon.vue';
 
-import CopyIcon from './icons/CopyIcon.vue';
+import { modelItemDataProp } from './data/data';
 
 const leftClose = ref(false);
 
 const runType = ref('');
+const inputData:inputDataProp = ref({});
 const visible = computed(()=>{ 
     return runType.value==='try-run';
 }) 
@@ -41,8 +48,14 @@ const tryRun = () => {
 const submitProject = () => {
     console.log('submitProject');
 }
+const runProject = () => {
+    console.log('runProject');
+}
 const copyResult = () => {
     console.log('copyResult');
+}
+const addModel = (item:modelItemDataProp) => {
+   console.log('addModel',item);
 }
 </script>
 <template>
@@ -52,7 +65,7 @@ const copyResult = () => {
         @submitProject="submitProject"
     />
     <div class="workflow-wrapper">
-        <el-button :icon="ArrowRight"
+        <el-button :icon="MenuIcon"
         class="w-l-left-close-icon"
         v-if="leftClose"
         @click="closeOrOpenLeftArea"
@@ -70,44 +83,62 @@ const copyResult = () => {
                 @click="closeOrOpenLeftArea"
                 />
             </div>
-            <div class="workflow-content"></div>
+            <div class="workflow-content">
+                <Models @addModel="addModel"/>
+            </div>
         </div>
-        <div class="workflow-right"></div>
+        <div class="workflow-right">
+            <VueFlow/>
+        </div>
         <div class="workflow-run-result" :class="[runType!=='run'?'workflow-container-right-close':'']">
-            <div class="workflow-result-title">
-                <el-button :icon="ArrowRightBold" round :size="'small'"
-                class="w-l-right-icon"
-                @click="closeResult"
-                />
-                <span class="w-l-run-result-text">运行结果</span>
-            </div>
-            <div class="workflow-run-result-content">
-                <div class="w-r-r-text-area">
-                    <span>输出变量</span>
-                    <el-button :icon="CopyIcon"
-                    class="w-r-r-text-icon"
-                    @click="copyResult"
-                    />
-                </div>
-                <div class="w-r-r-json">
-                    <span><span class="w-r-r-json-key">{{'gggg'}}</span> : {{'88uuuuu - ggggg -  88uuuuu'}}</span>
-                </div>
-            </div>
+            <RunResult 
+            @closeResult="closeResult"
+            @copyResult="copyResult"
+            />
         </div>
     </div>
-    <el-drawer v-model="visible" :show-close="false">
-        <template #header="{ titleId, titleClass }">
-            <div class="w-try-run-flex">
-                <el-button class="w-try-run-close-icon" 
-                :icon="WorkFlowRunResultCloseIcon"
-                @click="closeResult" 
-                />
-                <h4 :id="titleId" class="w-try-run-close-title">This is a custom header!</h4>
+    <div>
+        <el-drawer :model-value="visible" :show-close="false"
+        @close="closeResult"
+        size="600px"
+        class="workflow-el-drawer-wrapper"
+        >
+            <template #header="{}">
+                <div class="w-try-run-flex">
+                    <el-button class="w-try-run-close-icon" 
+                    :icon="WorkFlowRunResultCloseIcon"
+                    @click="closeResult" 
+                    />
+                    <span class="w-try-run-close-title">试运行</span>
+                </div>
+                
+            </template>
+            <div class="w-try-run-start w-try-r-s">
+                <img src="./images/icon-start.png" alt="w-try-run-icon-start" class="w-try-run-icon-start" />
+                <span class="w-try-run-start-text">开始节点</span>
             </div>
+            <div class="w-try-run-default-param w-try-run-d-p">
+                <span class="w-try-run-d-p-text">{{'BOT_USER_INPUT'}}</span>
+                <span class="w-try-run-d-p-label">{{'String'}}</span>
+            </div>
+            <div class="w-try-run-input">
+                <el-input v-model="inputData['BOT_USER_INPUT']" style="width: 100%" placeholder="请输入BOT_USER_INPUT" 
+                :clearable="true"
+                />
+            </div>
+            <template #footer="{}">
+                <div class="w-try-run-button">
+                    <el-button :icon="RunIcon"
+                    class="w-t-r-b"
+                    @click="runProject"
+                    >
+                    运行
+                    </el-button>
+                </div>
+            </template>
             
-        </template>
-        This is drawer content.
-    </el-drawer>
+        </el-drawer>
+    </div>
 </template>
 <style lang="scss" scoped>
 :deep(.el-button--small.is-round){
@@ -115,21 +146,116 @@ const copyResult = () => {
     border: 1px solid transparent;
     border-radius: 8px;
 }
+.workflow-el-drawer-wrapper{
+    position: relative;
+    background: #f7f7fa;
+}
+:deep(.el-drawer){
+    background-color: #f7f7fa;
+}
+:deep(.el-drawer__header){
+    margin-bottom: 0px;
+}
+.w-try-run-button{
+   display: flex;
+   justify-content: flex-end;
+}
+.w-t-r-b{
+    background-color: rgb(77,83,232);
+    border-radius: 8px;
+    color:#fff;
+    border: 1px solid transparent;
+    align-items: center;
+    box-shadow: none;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: SF Pro Display,-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    height: 32px;
+    justify-content: center;
+    line-height: 22px;
+    outline: none;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    min-width: 96px;
+}
+.w-t-r-b:hover{
+    background-color:rgba( 59,62,196 ,1);
+}
+.w-try-run-default-param,
+.w-try-run-start{
+    display: flex;
+    flex-direction: flex;
+    align-items: center;
+}
+.w-try-run-input{
+    box-sizing: border-box;
+}
+:deep(.el-input__wrapper){
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 1px solid rgba( 56,55,67 ,0.08);
+}
+.w-try-run-icon-start{
+    border-radius: 4px;
+    flex-shrink: 0;
+    height: auto;
+    margin-right: 8px;
+    width: 20px;
+}
+.w-try-run-start-text{
+    color: #1d1c23;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+}
+.w-try-r-s{
+    margin-bottom: 12px;
+}
+.w-try-run-d-p{
+    line-height: 22px;
+    font-size: 12px;
+    margin-bottom: 8px;
+    overflow-wrap: break-word;
+}
+.w-try-run-d-p-text{
+    color: #1d1c23;
+    font-weight: 500;
+}
+.w-try-run-d-p-label{
+    color: rgba(29, 28, 35, .35);
+    margin-left: 8px;
+}
 .w-try-run-close-title{
-
+    font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    color:rgb(56, 55, 67);
 }
 .w-try-run-flex{
     display: flex;
     flex-direction: row;
     align-items: center;
-
 }
 .w-try-run-close-icon{
-    height: 36px;
-    width: 36px;
+    height: 32px;
+    width: 32px;
     z-index: 50;
+    font-size: 24px;
     border:1px solid transparent;
     background: transparent;
+    margin-right: 8px;
+    color: rgb(28, 29, 35);
 }
 .w-l-right-result-icon{
     position: absolute;
@@ -159,19 +285,13 @@ const copyResult = () => {
 }
 
 .workflow-title{
-    padding: 0px 16px;
+    padding: 0px 16px 16px;
     text-align: left;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
 }
-.workflow-result-title{
-    padding: 16px 16px 24px;
-    text-align: left;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-}
+
 .w-l-text{
     flex: 1;
     font-family: SF Pro Display,-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif;
@@ -192,74 +312,28 @@ const copyResult = () => {
     transition: width .1s linear,padding .1s linear;
     width: 300px;
 }
-.w-l-run-result-text{
-    color: rgba( 56,55,67 ,1);
-    font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 22px;
-    margin-left: 8px;
+
+.w-l-left-icon{
+    margin-right: 16px;
+    color: rgb(77, 83, 232);
+    font-size: 10px;
 }
-.w-l-left-icon,
-.w-l-right-icon
-{
-    margin-right: 0px;
-}
+
 .workflow-wrapper{
     background-color: #f2f3f5;
     box-sizing: border-box;
     position: relative;
-    height: 100%;    
+    height: calc(100% - 72px);
     display: flex;
     flex-direction: row;
     overflow: hidden;
 }
 .workflow-content{
-    padding: 0px 16px;
     display: flex;
     flex: 1 1;
     flex-direction: row;
     overflow: auto;
     position: relative;
-}
-.workflow-run-result-content{
-    position: relative;
-    padding: 0 24px;
-}
-.w-r-r-text-icon{
-    border: 1px solid transparent;
-    background: transparent;
-    padding: 0;
-}
-.w-r-r-json{
-    background: rgba(46, 46, 56, .04);
-    border: 1px solid rgba(29, 28, 35, .08);
-    border-radius: 8px;
-    max-height: 272px;
-    overflow-y: auto;
-    padding: 6px 12px;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-    color: rgb(29, 28, 35);
-}
-.w-r-r-json-key{
-    color: rgb(77, 83, 232);
-}
-.w-r-r-text-area{
-    align-items: center;
-    color: #1d1c23;
-    column-gap: 8px;
-    display: flex;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 22px;
-    margin-bottom: 12px;
-    margin-top: 16px;
 }
 
 .workflow-left{
@@ -293,4 +367,5 @@ const copyResult = () => {
 .workflow-right{
     flex:1;
 }
+
 </style>
