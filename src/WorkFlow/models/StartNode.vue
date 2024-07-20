@@ -2,7 +2,7 @@
 import RightIcon from '../icons/RightIcon.vue'
 import NoticeIcon from '../icons/NoticeIcon.vue'
 import ExportIcon from '../icons/ExportIcon.vue'
-import ParamsItem1 from '../basic/ParamsItem1.vue'
+import ParamsItem from '../basic/ParamsItem.vue'
 import { toopTipText, toopTipText1 } from '../data/tooltips'
 import { startNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
@@ -12,6 +12,10 @@ const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const paramsData = ref(startNodeParams);
+const startNode = ref({
+    inputParams:paramsData.value,
+});
+
 const collapseArr = ['input'];
 const openAll = () => {
     collapseArr.forEach(key=>{
@@ -34,9 +38,17 @@ const collapseChange = (arr:any) => {
         });
     }
 }
+const keepOpen = (key:string) => {
+    if(!openCollapse.value[key]){
+        return;
+    }
+    // 打开{key}区域
+    openCollapse.value[key] = true;
+    openCollapseArr.value.push(key);
+}
 const exportJSONData = () => {
     console.log('exportJSONData');
-
+    keepOpen('input');
 }
 // 新增一条输入框
 const addItem = () => {
@@ -105,7 +117,7 @@ onMounted(()=>{
                             :content="toopTipText"
                             placement="top"
                         >
-                            <el-icon class="s-n-c-header-icon">
+                            <el-icon class="s-n-c-header-icon s-n-c-header-icon-margin">
                                 <NoticeIcon />
                             </el-icon>
                         </el-tooltip>
@@ -127,7 +139,7 @@ onMounted(()=>{
                         
                     </template>
                     <div>
-                        <ParamsItem1 :data="paramsData"
+                        <ParamsItem :data="paramsData"
                         @addItem="addItem"
                         />
                     </div>
@@ -197,6 +209,7 @@ onMounted(()=>{
     font-size: 14px;
     margin-right: 8px;
     border-color: transparent;
+    background-color: transparent;
     // transition: transform .3s;
 }
 .s-n-c-text{
@@ -230,9 +243,10 @@ onMounted(()=>{
     }
 }
 
-
+.s-n-c-header-icon-margin{
+    margin: 0 12px 0 4px;
+}
 .s-n-c-header-icon{
-    margin-left: 2px;
     height: 12px;
     width: 12px;
     color: rgb(167, 169, 176);
@@ -259,10 +273,10 @@ onMounted(()=>{
 </style>
 
 <style>
-div[data-id="10000"].vue-flow__node-default{
+div[data-id^="10000-"].vue-flow__node-default{
     width: 775px;
 }
-div[data-id="10000"] div[data-handlepos="left"]{
+div[data-id^="10000-"] div[data-handlepos="left"]{
    display: none;
 }
 </style>

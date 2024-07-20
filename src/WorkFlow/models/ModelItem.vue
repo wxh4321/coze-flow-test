@@ -60,6 +60,7 @@ const addModel = (item:modelItemDataProp) => {
     flex: 1 1;
     font-size: 16px;
     font-weight: 600;
+    text-align: left;
 }
 
 .m-i-icon{

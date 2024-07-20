@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import ModelItem from './models/ModelItem.vue';
-
 import { modelItemDatas } from './data/index';
 import { modelItemDataProp } from './data/data';
+import { debounce } from '../utils'
+import { EventBus } from '../utils/EventBus';
+
 const modelsData = ref(modelItemDatas);
+const sendData:any = ref({});
 const modelStyle1:any = ref({
     zIndex: 1,
     position: 'relative',
@@ -19,9 +22,33 @@ const modelStyle2:any = ref({
     width: 'calc(100% - 32px)',
 });
 const emit = defineEmits(['addModel']);
+// eventBus
+const eventBus = EventBus();
 const addModel = (item:modelItemDataProp) => {
-    emit('addModel',item);
+    sendData.value.id = item.id;
+    sendData.value.position = null;
+    eventBus.emit('dragAddNode', sendData.value);
+    setTimeout(() => {
+        eventBus.emit('clickAddNode');
+    }, 100);
+    // emit('addModel',item);
 }
+const dragDebounce = debounce(()=>{
+    console.log('send ',sendData.value);
+    eventBus.emit('dragAddNode', sendData.value);
+}, 100);
+const itemDrag = (e:any,item:any) => {
+    // console.log('drag', e, item);
+    if(e.screenX){
+        sendData.value.position = {
+            x: e.screenX-330,
+            y: e.screenY-200,
+        };
+    }
+    sendData.value.id = item.id;
+    dragDebounce();
+}
+
 
 </script>
 <template>
@@ -42,6 +69,7 @@ const addModel = (item:modelItemDataProp) => {
             :class="item.disabled?'model-item-disabled':''"
             :style="modelStyle2"
             :draggable="!item.disabled"
+            @drag="(e:any)=>{itemDrag(e,item)}"
             >
                 <el-tooltip
                     :offset="36"

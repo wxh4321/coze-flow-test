@@ -3,7 +3,8 @@ export const inputParam = {
     value:'',
     placeholder:'',
     warning:'',
-    disabled: false
+    disabled: false,
+    style:{},
 }
 export const selectParam = {
     type:'select',
@@ -13,16 +14,20 @@ export const selectParam = {
         {label:'Integer',value:'Integer'}
     ],
     placeholder:'',
+    noDataText:'暂无数据',
     warning:'',
-    disabled:false
+    disabled:false,
+    style:{},
 }
 export const textareaParam = {
     type:'textarea',
     value:'',
     placeholder:'',
     warning:'',
+    showWordLimit:true,
     maxlength:1000,
-    disabled:false
+    disabled:false,
+    style:{},
 }
 
 export const checkBoxParam ={
@@ -31,9 +36,11 @@ export const checkBoxParam ={
     selected:true,
     placeholder:'',
     warning:'',
-    disabled:false
+    disabled:false,
+    style:{},
 }
 export const deleteIconParam = {
     type:'delete-icon',
-    disabled:false
+    disabled:false,
+    style:{},
 }
