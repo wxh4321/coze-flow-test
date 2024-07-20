@@ -1,0 +1,61 @@
+:root {
+  --el-color-primary: #bf1739 !important;
+  --el-base-font: 'Pingfang-SC', 'Microsoft YaHei-Regular';
+  /* , 'Pingfang-SC-semibold', 'Microsoft YaHei-Bold'; */
+  --el-menu-item-font-size: 15px;
+  --el-menu-text-color: var(--cust-font-color);
+  --el-menu-hover-bg-color: #fff;
+  --el-menu-item-height: 40px;
+  --el-menu-sub-item-height: 38px;
+  --el-component-size-large:44px;
+  --el-button-hover-border-color: var(--el-color-primary) !important;
+  --el-color-primary-light-9: #F4EBEB !important;
+  --el-color-primary-light-7: var(--el-color-primary) !important;
+  --el-color-primary-light-3: var(--el-color-primary) !important;
+  --el-text-color-regular: #2b2b2b;
+  --el-text-color-primary: #2b2b2b;
+  --el-border-color-light: #eee;
+
+  --cust-gray-color: #999;
+  --cust-border-color: #eee;
+  --cust-font-color: #333;
+  --cust-font-color1: #666;
+  --cust-color-link: #25559F;
+  --cust-main-bg: #F7F8F9;
+}
+
+.el-button--primary {
+  --el-button-active-bg-color: var(--el-color-primary) !important;
+  --el-button-active-border-color: var(--el-color-primary) !important;
+}
+.el-pagination {
+  --el-pagination-button-bg-color: #fff !important;
+  --el-disabled-bg-color: #fff !important;
+}
+
+body {
+  background: #fff;
+  color: #000;
+}
+
+#app {
+  height: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+a {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: var(--van-primary-color);
+  text-decoration: underline;
+}
