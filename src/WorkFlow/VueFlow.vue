@@ -102,7 +102,7 @@ eventBus.on('clickAddNode', (data: any) => {
 });
 // 删除某个节点
 eventBus.on('deleteNode', (data: any) => {
-    console.log('deleteNode',data);
+    console.log('delete node',data.id||'');
     removeNodes(data.id);
 });
 // onMounted(()=>{

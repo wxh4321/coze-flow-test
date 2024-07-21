@@ -4,6 +4,7 @@ import NoticeIcon from '../icons/NoticeIcon.vue'
 import UserSettingIcon from '../icons/UserSettingIcon.vue'
 import ParamsItem from '../basic/ParamsItem.vue'
 import ModelHeaderRight from '../basic/ModelHeaderRight.vue'
+import ModelTreeText from '../basic/ModelTreeText.vue'
 import { toopTipText5,toopTipText6,toopTipText7,toopTipText8 } from '../data/tooltips'
 import { bigModelInputNodeParams,bigModelOutputNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
@@ -21,8 +22,38 @@ const currentInstance:any = getCurrentInstance();
 const ctx = currentInstance.ctx;
 
 const bigModelNode = ref({
-    inputParams:paramsData.value,
-    outputParams:paramsData1.value,
+    input:{
+        inputParams:paramsData.value,
+        checkbox:{
+            // type:'checkbox',
+            value:'',
+            selected:false,
+            placeholder:'',
+            warning:'',
+            disabled:false,
+            style:{},
+        },
+        // chatgpt历史数据
+        treeData:{
+            title:'chatHistory',
+            label:'Array<Object>',
+            children:[
+                {
+                    title:'role',
+                    label:'String',
+                    children:[]
+                },
+                {
+                    title:'content',
+                    label:'String',
+                    children:[]
+                }
+            ]
+        }
+    },
+    output:{
+        outputParams:paramsData1.value,
+    },
     title:{
         type:'input',
         value:'大模型',
@@ -233,6 +264,7 @@ onMounted(()=>{
                             <el-button class="bm-n-collapse-icon" 
                             :class="[openCollapse['input']?'bm-n-is-active':'']"
                             :icon="RightIcon"
+                            @click="clickCollapseItem('input')"
                             />
                             <span class="bm-n-c-text">输入</span>
                             <el-tooltip
@@ -246,7 +278,16 @@ onMounted(()=>{
                                     <NoticeIcon />
                                 </el-icon>
                             </el-tooltip>
+                            <div class="bm-n-c-header-right">
+                                <el-checkbox v-model="bigModelNode.input.checkbox.selected" :disabled="bigModelNode.input.checkbox.disabled"
+                                :style="bigModelNode.input.checkbox.style"
+                                >{{bigModelNode.input.checkbox.value}}</el-checkbox>
+                                <span class="bm-n-c-h-r-text">Bot对话历史</span>
+                            </div>
                         </template>
+                        <div class="bm-n-c-chat-history" v-if="bigModelNode.input.checkbox.selected">
+                            <ModelTreeText :data="bigModelNode.input.treeData"/>
+                        </div>
                         <div>
                             <ParamsItem :data="paramsData"
                             key="bmInput"
@@ -307,6 +348,7 @@ onMounted(()=>{
                             <el-button class="bm-n-collapse-icon" 
                             :class="[openCollapse['output']?'bm-n-is-active':'']"
                             :icon="RightIcon"
+                            @click="clickCollapseItem('output')"
                             />
                             <span class="bm-n-c-text">输出</span>
                             <el-tooltip
@@ -489,6 +531,15 @@ onMounted(()=>{
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+}
+.bm-n-c-h-r-text{
+    color: rgb(56, 55, 67);
+    font-size: 14px;
+    line-height: 20px;
+    height: 20px;
+}
+.bm-n-c-chat-history{
+    margin-top: 8px;
 }
 :deep(.el-button.is-active){
     background-color: transparent;

@@ -223,7 +223,6 @@ watch(
     margin-left: 8px;
 }
 .params-item-wrapper{
-    
     display: flex;
     flex-direction: row;
     align-items: flex-start;
