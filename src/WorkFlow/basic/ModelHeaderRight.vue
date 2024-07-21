@@ -70,9 +70,15 @@ const deleteNode = () => {
 .basic-n-t-r-icon{
     @extend .basic-n-t-icon;
     margin-right: 0px;
+    &:hover{
+        background-color: var(--el-color-primary-light-9);
+    }
 }
 .basic-n-t-r-omit-icon{
     @extend .basic-n-t-icon;
     margin-right: 0px;
+    &:hover{
+        background-color: var(--el-color-primary-light-9);
+    }
 }
 </style>

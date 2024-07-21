@@ -34,7 +34,11 @@ const props = defineProps({
             {name:'是否必要',flexNum:''},
             {name:'',flexNum:''}
         ]
-    }
+    },
+    showAddIcon: {
+        type:Boolean,
+        default:true
+    },
 });
 const paramsData = ref(props.data);
 const emit = defineEmits(['addItem','saveParams','deleteItem']);
@@ -142,7 +146,7 @@ watch(
             </div>
         </div>
     </div>
-    <div class="params-item-footer">
+    <div class="params-item-footer" v-if="props.showAddIcon">
         <el-button :icon="AddIcon"
         class="p-i-f-button"
         @click="addItem"

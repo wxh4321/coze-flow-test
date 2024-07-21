@@ -38,17 +38,28 @@ const collapseChange = (arr:any) => {
         });
     }
 }
+
 const keepOpen = (key:string) => {
-    if(!openCollapse.value[key]){
-        return;
-    }
     // 打开{key}区域
     openCollapse.value[key] = true;
     openCollapseArr.value.push(key);
 }
+const keepClose = (key:string) => {
+    // 关闭{key}区域
+    openCollapse.value[key] = false;
+    const findIndex = openCollapseArr.value.findIndex((item:string)=>item===key);
+    openCollapseArr.value.splice(findIndex,1);
+}
+const clickCollapseItem = (key:string) => {
+    if(!openCollapse.value[key]){
+        keepOpen(key);
+    }
+    else{
+        keepClose(key);
+    }
+}
 const exportJSONData = () => {
     console.log('exportJSONData');
-    keepOpen('input');
 }
 // 新增一条输入框
 const addItem = () => {
@@ -103,11 +114,12 @@ onMounted(()=>{
             <el-collapse @change="collapseChange"
             v-model="openCollapseArr"
             >
-                <el-collapse-item name="input">
+                <el-collapse-item name="input" :disabled="true">
                     <template #title>
                         <el-button class="s-n-collapse-icon" 
                         :class="[openCollapse['input']?'s-n-is-active':'']"
                         :icon="RightIcon"
+                        @click="clickCollapseItem('input')"
                         />
                         <span class="s-n-c-text">输入</span>
                         <el-tooltip

@@ -1,11 +1,15 @@
 <script lang="ts" setup>
+import {
+    ArrowDown,
+} from '@element-plus/icons-vue'
 import RightIcon from '../icons/RightIcon.vue'
 import NoticeIcon from '../icons/NoticeIcon.vue'
 import UserSettingIcon from '../icons/UserSettingIcon.vue'
+import ExportIcon from '../icons/ExportIcon.vue'
 import ParamsItem from '../basic/ParamsItem.vue'
 import ModelHeaderRight from '../basic/ModelHeaderRight.vue'
 import ModelTreeText from '../basic/ModelTreeText.vue'
-import { toopTipText5,toopTipText6,toopTipText7,toopTipText8 } from '../data/tooltips'
+import { toopTipText1,toopTipText5,toopTipText6,toopTipText7,toopTipText8 } from '../data/tooltips'
 import { bigModelInputNodeParams,bigModelOutputNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
@@ -53,6 +57,10 @@ const bigModelNode = ref({
     },
     output:{
         outputParams:paramsData1.value,
+        export:{
+            tabText:'Json',
+            tabindex:2
+        }
     },
     title:{
         type:'input',
@@ -222,6 +230,19 @@ const deleteNode = () => {
 const userSetting = () => {
     console.log('userSetting');
 }
+const exportJSONData = () => {
+    console.log('exportJSONData');
+}
+const tabClick = (index:number,text:string) => {
+    bigModelNode.value.output.export.tabindex = index;
+    bigModelNode.value.output.export.tabText = text;
+    if(index!==2){
+        paramsData1.value[0].list[1].disabled = true;
+    }
+    else{
+        paramsData1.value[0].list[1].disabled = false;
+    }
+}
 onMounted(()=>{
     openAll();
 });
@@ -362,10 +383,57 @@ onMounted(()=>{
                                     <NoticeIcon />
                                 </el-icon>
                             </el-tooltip>
+                            <div class="bm-n-c-header-right">
+                                <el-dropdown>
+                                <el-button class="bm-n-c-r-select-icon">
+                                    <span class="bm-n-c-r-text">输出格式</span>
+                                    <el-popover
+                                        placement="top"
+                                        title=""
+                                        :width="200"
+                                        trigger="hover"
+                                    >
+                                        <template #reference>
+                                            <el-icon class="bm-n-c-header-icon bm-n-c-header-icon-export-margin">
+                                                <NoticeIcon />
+                                            </el-icon>
+                                        </template>
+                                        <ul class="bm-n-c-sibling-br">
+                                            <li><strong>文本</strong>: 使用普通文本格式回复</li>
+                                            <li><strong>Markdown</strong>: 将引导模型使用Markdown格式输出回复</li>
+                                            <li><strong>JSON</strong>: 将引导模型使用JSON格式输出</li>
+                                        </ul>
+                                    </el-popover>
+                                    <span class="bm-n-c-r-export-text">{{bigModelNode.output.export.tabText}}</span>
+                                    <el-icon class="bm-n-c-el-icon-right"><ArrowDown /></el-icon>
+                                </el-button>
+                                <template #dropdown>
+                                    <el-dropdown-menu>
+                                        <el-dropdown-item @click="tabClick(0,'文本')">文本</el-dropdown-item>
+                                        <el-dropdown-item @click="tabClick(1,'Markdown')">Markdown</el-dropdown-item>
+                                        <el-dropdown-item @click="tabClick(2,'Json')">Json</el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </template>
+                                </el-dropdown>
+                                <el-tooltip
+                                v-if="bigModelNode.output.export.tabindex===2"
+                                :offset="12"
+                                class="tooltip-box-item-export"
+                                effect="dark"
+                                :content="toopTipText1"
+                                placement="top"
+                                >
+                                    <el-button class="bm-n-c-icon" 
+                                    :icon="ExportIcon"
+                                    @click="exportJSONData" 
+                                    />
+                                </el-tooltip>
+                            </div>
                         </template>
                         <div>
                             <ParamsItem :data="paramsData1"
                             key="bmouput"
+                            :showAddIcon="bigModelNode.output.export.tabindex===2"
                             @addItem="addItemOutput"
                             :titles="outputTitles"
                             />
@@ -381,6 +449,70 @@ onMounted(()=>{
     --el-color-primary-light-9: #F4EBEB !important;
     --el-color-primary:rgba( 77,83,232 ,1)!important;
     --el-color-primary1:rgba( 77,83,232 ,1);
+    --el-dropdown-menuItem-hover-color:rgba( 77,83,232 ,1);
+    list-style: disc;
+}
+
+.basic-n-t-icon{
+    cursor: pointer !important;
+    color: rgba(6, 7, 9);
+    fill:rgba(6, 7, 9);
+    font-weight: 600;
+    padding: 4px!important;
+    height: 22px;
+    font-size: 14px;
+    margin-right: 8px;
+    border-color: transparent;
+    background-color: transparent;
+}
+.bm-n-c-el-icon-right{
+    color: rgba(56, 55, 67, 0.6);
+    font-weight:500;
+    font-size: 12px;
+    margin-left: 4px;
+}
+.bm-n-c-icon{
+    @extend .basic-n-t-icon;
+    margin-right: 0px;
+    color: rgb(77, 83, 232);
+    :hover{
+        background-color: var(--el-color-primary-light-9);
+    }
+}
+.bm-n-c-r-select-icon{
+    @extend .basic-n-t-icon;
+    margin-right: 0px;
+    &:hover{
+        background-color: var(--el-color-primary-light-9);
+    }
+}
+.bm-n-c-sibling-br{
+    padding-left: 18px;
+}
+.bm-n-c-header-right{
+    li{
+        font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+        color: rgb(34, 34, 34);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    li::marker{
+        unicode-bidi: isolate;
+        font-variant-numeric: tabular-nums;
+        text-transform: none;
+        text-indent: 0px !important;
+        text-align: start !important;
+        text-align-last: start !important;
+    }
+    ul>li {
+        list-style-type: disc;
+    }
+    li+li{
+        margin-top: 8px;
+    }
+    strong{
+        font-weight: 700;
+    }
 }
 .public-el-wrapper{
     border: 1px solid rgba( 56,55,67 ,0.08) ;
@@ -483,13 +615,6 @@ onMounted(()=>{
     width: 100%;
 }
 
-.bm-n-c-icon{
-    @extend .bm-n-t-icon;
-    margin-right: 0px;
-    background-color: transparent;
-    color: rgb(77, 83, 232);
-}
-
 .bm-n-collapse-icon{
     @extend .bm-n-t-icon;
     margin-right: 0px;
@@ -502,6 +627,9 @@ onMounted(()=>{
 
 .bm-n-c-header-icon-margin{
     margin: 0 12px 0 4px;
+}
+.bm-n-c-header-icon-export-margin{
+    margin: 0 2px 0 4px;
 }
 .bm-n-c-header-icon{
     height: 12px;
@@ -524,7 +652,18 @@ onMounted(()=>{
         background-color: var(--el-color-primary-light-9);
     }
 }
-
+.bm-n-c-r-export-text{
+    color: rgba(6, 7, 9, 0.8);
+    font-size: 14px;
+    font-weight: 400;
+    cursor: grab;
+}
+.bm-n-c-r-text{
+    color: rgba(6, 7, 9, 0.5);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe Ul, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+}
 .bm-n-c-header-right{
     display: flex;
     flex: 1;
