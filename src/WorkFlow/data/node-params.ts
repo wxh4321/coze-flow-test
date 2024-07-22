@@ -74,3 +74,112 @@ export const bigModelOutputNodeParams = [
         ]
     }
 ];
+
+export const knowledgeNodeParams = [
+    {
+        id:1,
+        list:[
+            {
+                type:'input-text',
+                name:'Query',
+                value:'String',
+                required:true,
+                // placeholder:'',
+                // warning:'',
+                // disabled: false,
+                // style:{},
+            },
+            {
+                type:'select',
+                placeholder:'',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'1',
+                options:[
+                    {label:'引用',value:'1'},
+                    {label:'输入',value:'2'}
+                ],
+                style:{
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderRight:true,
+            },
+            {
+                type:'select',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'',
+                placeholder:'请选择',
+                options:[],
+                style:{
+                    marginLeft:'-4px',
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderLeft:true,
+            }
+        ]
+    }
+];
+
+export const textNodeParams = [
+    {
+        id:1,
+        list:[
+            {
+                type:'input-text',
+                name:'String1',
+                value:'',
+                required:false,
+                style:{
+                    height:'32px'
+                }
+                // placeholder:'',
+                // warning:'',
+                // disabled: false,
+            },
+            {
+                type:'select',
+                placeholder:'',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'1',
+                options:[
+                    {label:'引用',value:'1'},
+                    {label:'输入',value:'2'}
+                ],
+                style:{
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderRight:true,
+            },
+            {
+                type:'select',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'',
+                placeholder:'请选择',
+                options:[],
+                style:{
+                    marginLeft:'-4px',
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderLeft:true,
+            },
+            {
+                type:'delete-icon',
+                disabled:false,
+                actionDisabled:false,
+                style:{
+                    marginTop:'6px',
+                    fontSize:'20px',
+                    // cursor:'not-allowed'
+                },
+            }
+        ]
+    }
+];
+

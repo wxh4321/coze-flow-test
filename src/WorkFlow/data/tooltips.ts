@@ -7,5 +7,13 @@ export const toopTipText5 = '输入需要添加到提示词的信息，这些信
 export const toopTipText6 = '编辑大模型的用户提示词以生成内容。';
 export const toopTipText7 = '大模型运行完成后生成的内容';
 export const toopTipText8 = '人设与回复逻辑';
-// export const toopTipText9 = '';
+export const toopTipText9 = '输入需要从知识中匹配的关键信息';
+export const toopTipText10 = '选择需要匹配的知识范围，仅从选定的知识中召回信息';
+export const toopTipText11 = '输出列表在是所有选定知识中召回的与输入参数最匹配的信息';
+export const toopTipText12 = '请输入字符串类型参数，这些参数可以被用于处理特定格式';
+export const toopTipText13 = '处理后的字符串输出结果';
+export const toopTipText14 = '分隔文本的符号（注意区分全半角符号），分隔后将自动变成字符串数组。';
+
+
+
 

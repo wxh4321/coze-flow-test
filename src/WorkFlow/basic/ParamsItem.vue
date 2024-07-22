@@ -41,8 +41,11 @@ const props = defineProps({
     },
 });
 const paramsData = ref(props.data);
-const emit = defineEmits(['addItem','saveParams','deleteItem']);
-
+const emit = defineEmits(['addItem','saveParams','deleteItem','selectChange']);
+// 选择事件监听
+const selectChange = (value:any,item:any,i:number,j:number) => {
+    emit('selectChange',{value,i,j,item});
+}
 // 删除某一行
 const deleteItem = (item:any,index:number,v:any) => {
     console.log('deleteItem ', item,index,v);
@@ -96,10 +99,24 @@ watch(
             <div class="p-i-content" 
             :key="'content'+j"
             >
-                <div v-if="v.type==='input'" class="p-i-content-item">
+                <div v-if="v.type==='input'" class="p-i-content-item"
+                :class="[
+                    v.cutBorderRight?'p-i-c-border-input-right':'',
+                    v.cutBorderLeft?'p-i-c-border-input-left':'',
+                ]"
+                >
                     <el-input v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
                     :style="v.style"
                     />
+                </div>
+                <div v-if="v.type==='input-text'" class="p-i-content-item">
+                    <div class="p-i-input-text"
+                    :style="v.style"
+                    >
+                        <span class="p-i-i-name">{{v.name}}</span>
+                        <span class="p-i-i-required" v-if="v.required">*</span>
+                        <div class="p-i-i-value" v-if="v.value">{{v.value}}</div>
+                    </div>
                 </div>
                 <div v-if="v.type==='textarea'" class="p-i-content-item"
                 :class="[focusIndex===i?'p-i-c-focus':'p-i-c-nofocus']"
@@ -121,6 +138,8 @@ watch(
                     <el-select v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
                     :no-data-text="v.noDataText"
                     :style="v.style"
+                    @change="(value:any)=>{selectChange(value,item,i,j)}"
+
                     >
                         <el-option
                             v-for="(oItem,opIndex) in v.options"
@@ -181,6 +200,9 @@ watch(
 :deep(.el-textarea__inner){
     @extend .public-el-wrapper;
 }
+:deep(.el-input){
+    height:32px;
+}
 :deep(.el-input__wrapper){
     @extend .public-el-wrapper;
 }
@@ -232,6 +254,28 @@ watch(
     align-items: flex-start;
     gap: 8px;
 }
+.p-i-input-text{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.p-i-i-name{
+    font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe Ul, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: rgba(28, 31, 35, .8);
+}
+.p-i-i-required{
+    color: rgb(249, 57, 32);
+}
+.p-i-i-value{
+    margin-left: 8px;
+    font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe Ul, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: rgba(28, 31, 35,.8);
+    background-color: rgba(6, 7, 9, 0.04);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
 .p-i-title{
     margin-top: 8px;
     color: rgba(28, 31, 35, .35);
@@ -247,6 +291,17 @@ watch(
 }
 .p-i-content-item{
     width: 100%;
+}
+
+.p-i-c-border-input-left{
+    :deep(.el-input__wrapper){
+        border-radius: 0 8px 8px 0;
+    }
+}
+.p-i-c-border-input-right{
+    :deep(.el-input__wrapper){
+        border-radius: 8px 0 0 8px;
+    }
 }
 .p-i-c-border-select-left{
     :deep(.el-select__wrapper){

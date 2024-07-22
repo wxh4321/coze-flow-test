@@ -2,7 +2,7 @@
 import ModelItem from './models/ModelItem.vue';
 import { modelItemDatas } from './data/index';
 import { modelItemDataProp } from './data/data';
-import { debounce } from '../utils'
+import { debounce } from '../utils';
 import { EventBus } from '../utils/EventBus';
 
 const modelsData = ref(modelItemDatas);
@@ -88,11 +88,11 @@ const itemDrag = (e:any,item:any) => {
         
     </div>
 </template>
-<style>
+<!-- <style>
 .el-popper{
     max-width: 200px;
 }
-</style>
+</style> -->
 <style lang="scss" scoped>
 
 .models-wrapper{

@@ -20,17 +20,22 @@ const props:any = defineProps({
         type:Object,
         default:{}
     },
-    // s是否展示底部的线
+    // 是否展示底部的线
     showBottomLine:{
         type:Boolean,
         default:true
-    }
+    },
+    // 是否默认打开所有树节点
+    openAll:{
+        type:Boolean,
+        default:false
+    },
 });
 const root = props.data;
 
 </script>
 <template>
-    <ModelTreeTextItem :data="root"/>
+    <ModelTreeTextItem :data="root" :openAll="openAll"/>
     <div class="model-tree-text-line" v-if="showBottomLine"></div>
 </template>
 <style lang="scss" scoped>

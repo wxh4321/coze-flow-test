@@ -4,27 +4,38 @@ import '@vue-flow/core/dist/theme-default.css';
 import { VueFlow, useVueFlow, Position } from '@vue-flow/core';
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { debounce } from '../utils'
-const { nodes, addNodes, addEdges, onConnect, onPaneReady, onNodeDragStop, dimensions,
+const { nodes,edges, addNodes, addEdges, onConnect, onPaneReady, onNodeDragStop, dimensions,
     removeNodes, removeEdges,
  } = useVueFlow()
 import StartNode from './models/StartNode.vue'
 import EndNode from './models/EndNode.vue'
 import BigModelNode from './models/BigModelNode.vue'
+import KnowledgeNode from './models/KnowledgeNode.vue'
+import KnowledgeModelDialog from './components/KnowledgeModelDialog.vue'
+import TextNode from './models/TextNode.vue'
+
 import { EventBus } from '../utils/EventBus';
 const VueFlowData = {
   id:1
 };
+const localNodes:any = ref(nodes);
+const localEdges:any = ref(edges);
+
 const eventBus = EventBus();
+const dialogVisible = ref(false);
 
 /**
  * 注意：
  * 这里的nodeid 10000-20000 是为了区分不同的节点类型
  * 不能轻易更改已有的节点id，因为不同节点会根据节点id来进行样式的修改，
  * 具体看查看每个节点的样式
+ * 注： nodesTypeObj的key 与 src\views\modelMan\data\index.ts中的modelItemDatas id 一一对应
  */
 const nodesTypeObj:any = {
     '10000':StartNode, // 开始节点
     '10002':BigModelNode, // 大模型节点
+    '10004':KnowledgeNode, // 知识模型节点
+    '10008':TextNode, // 文本节点
     '20000':EndNode // 结束节点
 };
 onConnect(addEdges)
@@ -105,14 +116,34 @@ eventBus.on('deleteNode', (data: any) => {
     console.log('delete node',data.id||'');
     removeNodes(data.id);
 });
+// 打开知识库弹窗
+eventBus.on('openKnowledgeDialog', (data: any) => {
+  dialogVisible.value = true;
+});
 // onMounted(()=>{
 //     addStartNode();
 //     addEndNode();
 // });
+// watch(
+//   () => localNodes.value,
+//   (newValue:any)=>{
+//     console.log('update nodes',newValue);
+//   },
+//   { immediate: true, deep: true }
+// );
+// watch(
+//   () => localEdges.value,
+//   (newValue:any)=>{
+//     console.log('update edges',newValue);
+//   },
+//   { immediate: true, deep: true }
+// );
 </script>
 <template>
     <VueFlow 
     @dragleave="vueFlowDragLeave"
+    :nodes="localNodes" 
+    :edges="localEdges"
     >
     <!-- <MiniMap /> -->
     <!-- <Controls /> -->
@@ -121,7 +152,14 @@ eventBus.on('deleteNode', (data: any) => {
       add node
     </button> -->
   </VueFlow>
+  <KnowledgeModelDialog :dialogVisible="dialogVisible"
+  @closeDialog="dialogVisible=false"
+  />
+  
 </template>
+<style lang="scss" scoped>
+
+</style>
 <style>
 .vue-flow__node-default{
     background: #fff;
@@ -140,6 +178,17 @@ eventBus.on('deleteNode', (data: any) => {
 .vue-flow__node-default:focus-visible {
     outline: none;
     border: 2px solid #4d53e8;
+}
+.vue-flow__edge-path{
+  stroke: #4d53e8;
+  stroke-width: 2;
+}
+.vue-flow__edge:hover .vue-flow__edge-path{
+  stroke: #37d0ff;
+}
+.vue-flow__edge.selected .vue-flow__edge-path, .vue-flow__edge:focus .vue-flow__edge-path, .vue-flow__edge:focus-visible .vue-flow__edge-path {
+  stroke: #37d0ff;
+  stroke-width: 3;
 }
 .vue-flow__node-default .vue-flow__handle, .vue-flow__node-input .vue-flow__handle, .vue-flow__node-output .vue-flow__handle {
     background: #9197f1;

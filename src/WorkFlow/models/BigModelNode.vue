@@ -392,6 +392,7 @@ onMounted(()=>{
                                         title=""
                                         :width="200"
                                         trigger="hover"
+                                        popper-class="bm-n-c-r-popover"
                                     >
                                         <template #reference>
                                             <el-icon class="bm-n-c-header-icon bm-n-c-header-icon-export-margin">
@@ -489,7 +490,7 @@ onMounted(()=>{
 .bm-n-c-sibling-br{
     padding-left: 18px;
 }
-.bm-n-c-header-right{
+.bm-n-c-r-popover{
     li{
         font-family: SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
         color: rgb(34, 34, 34);
@@ -712,8 +713,5 @@ onMounted(()=>{
 <style>
 div[data-id^="10002-"].vue-flow__node-default{
     width: 711px;
-}
-div[data-id^="10002-"] div[data-handlepos="right"]{
-   display: none;
 }
 </style>

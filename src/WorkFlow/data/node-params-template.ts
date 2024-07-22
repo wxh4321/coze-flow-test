@@ -1,3 +1,13 @@
+export const inputTextParam = {
+    type:'input-text',
+    name:'',
+    value:'',
+    required:true,
+    // placeholder:'',
+    // warning:'',
+    // disabled: false,
+    style:{},
+}
 export const inputParam = {
     type:'input',
     value:'',

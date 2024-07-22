@@ -20,10 +20,15 @@ const props:any = defineProps({
     data:{
         type:Object,
         default:{}
-    }
+    },
+    // 是否默认打开所有树节点
+    openAll:{
+        type:Boolean,
+        default:false
+    },
 });
 const root = props.data;
-const openCard = ref(false);
+const openCard = ref(props.openAll);
 
 const openOrCloseCard = () => {
     openCard.value = !openCard.value;
