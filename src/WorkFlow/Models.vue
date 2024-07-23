@@ -74,8 +74,9 @@ const itemDrag = (e:any,item:any) => {
                 <el-tooltip
                     :offset="36"
                     :disabled="item.disabled"
-                    class="tooltip-box-item"
+                    popper-class="tooltip-box-item"
                     effect="dark"
+                    :raw-content="true"
                     :content="item.tooltip"
                     placement="right"
                 >
@@ -88,13 +89,7 @@ const itemDrag = (e:any,item:any) => {
         
     </div>
 </template>
-<!-- <style>
-.el-popper{
-    max-width: 200px;
-}
-</style> -->
 <style lang="scss" scoped>
-
 .models-wrapper{
     display: flex;
     flex-direction: column;
@@ -122,16 +117,26 @@ const itemDrag = (e:any,item:any) => {
     :deep(.el-popper){
         width: 200px;
     }
+    &:hover{
+        box-shadow: 0 8px 12px 0 rgba(29, 28, 35, .1);
+    }
 }
+
 .model-item-disabled{
     cursor: not-allowed;
     background-color: #e4e7ed;
     border:1px solid #e4e7ed;
     color: #909399;
+    &:hover{
+        box-shadow: 0 6px 8px 0 rgba(29, 28, 35, .06)!important;
+    }
 }
-.tooltip-box-item {
-//   width: 110px;
-//   margin-top: 10px;
+
+</style>
+<style>
+.tooltip-box-item{
+    --el-text-color-primary:rgb(95, 94, 108)!important;
+    width: 200px;
+    border-radius: 6px;
 }
 </style>
-

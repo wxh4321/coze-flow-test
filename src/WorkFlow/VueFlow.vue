@@ -1,11 +1,18 @@
 <script lang="ts" setup>
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
-import { VueFlow, useVueFlow, Position } from '@vue-flow/core';
+import { VueFlow, useVueFlow, Position, MarkerType } from '@vue-flow/core';
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { debounce } from '../utils'
-const { nodes,edges, addNodes, addEdges, onConnect, onPaneReady, onNodeDragStop, dimensions,
-    removeNodes, removeEdges,
+const { 
+  nodes,edges, 
+  addNodes, updateNode, 
+  addEdges,updateEdge, 
+  removeNodes, removeEdges,
+  onEdgeUpdateStart,
+  onEdgeUpdateEnd,
+  onEdgeUpdate,
+  onConnect, onPaneReady, onNodeDragStop, dimensions,
  } = useVueFlow()
 import StartNode from './models/StartNode.vue'
 import EndNode from './models/EndNode.vue'
@@ -13,6 +20,7 @@ import BigModelNode from './models/BigModelNode.vue'
 import KnowledgeNode from './models/KnowledgeNode.vue'
 import KnowledgeModelDialog from './components/KnowledgeModelDialog.vue'
 import TextNode from './models/TextNode.vue'
+import ConditionNode from './models/ConditionNode.vue'
 
 import { EventBus } from '../utils/EventBus';
 const VueFlowData = {
@@ -23,7 +31,7 @@ const localEdges:any = ref(edges);
 
 const eventBus = EventBus();
 const dialogVisible = ref(false);
-
+const updatedEdge:any = ref(null);
 /**
  * 注意：
  * 这里的nodeid 10000-20000 是为了区分不同的节点类型
@@ -35,11 +43,32 @@ const nodesTypeObj:any = {
     '10000':StartNode, // 开始节点
     '10002':BigModelNode, // 大模型节点
     '10004':KnowledgeNode, // 知识模型节点
+    '10007':ConditionNode, // 条件节点
     '10008':TextNode, // 文本节点
     '20000':EndNode // 结束节点
 };
-onConnect(addEdges)
-
+onConnect((params:any)=>{
+  console.log('connnect ', params);
+  params = {
+    ...params,
+    updatable: true,
+    // markerEnd: MarkerType.Arrow,
+  };
+  addEdges([params]);
+})
+onEdgeUpdateStart((params:any)=>{
+  console.log('onEdgeUpdateStart ', params.edge)
+});
+onEdgeUpdateEnd((params:any)=>{
+  console.log('onEdgeUpdateEnd ', params.edge);
+  if(params){
+    removeEdges([params.edge]);
+  }
+});
+onEdgeUpdate((params:any)=>{
+  console.log('onEdgeUpdate ', params);
+  updateEdge(params.edge, params.connection);
+});
 onPaneReady((flowInstance) => console.log('flow loaded:', flowInstance))
 
 onNodeDragStop((node) => console.log('drag stop', node))
@@ -120,10 +149,10 @@ eventBus.on('deleteNode', (data: any) => {
 eventBus.on('openKnowledgeDialog', (data: any) => {
   dialogVisible.value = true;
 });
-// onMounted(()=>{
-//     addStartNode();
-//     addEndNode();
-// });
+onMounted(()=>{
+    addStartNode();
+    addEndNode();
+});
 // watch(
 //   () => localNodes.value,
 //   (newValue:any)=>{
@@ -183,6 +212,9 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
   stroke: #4d53e8;
   stroke-width: 2;
 }
+/* .vue-flow__edge-default.selected{
+  stroke: #37d0ff;
+} */
 .vue-flow__edge:hover .vue-flow__edge-path{
   stroke: #37d0ff;
 }
@@ -202,12 +234,20 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
     height: 8px;
     width: 8px;
 }
-.vue-flow__node-default:hover .vue-flow__handle,
-.vue-flow__handle:hover {
+.vue-flow__node-default:hover .vue-flow__handle{
     background: #4d53e8;
     border: 2px solid #fff;
     height: 16px;
     width: 16px;
+}
+.vue-flow__node-default:hover .vue-flow__handle-right:hover {
+    background-image: url(./svg/add-icon.svg);
+    background-color:#4d53e8; 
+    background-position: 42% 33%;
+    background-repeat: no-repeat;
+    border: 2px solid #fff;
+    height: 20px;
+    width: 20px;
 }
 
 </style>

@@ -83,7 +83,7 @@ watch(
 );
 </script>
 <template>
-    <div class="params-item-wrapper">
+    <div class="params-item-wrapper" v-if="titles && titles.length">
         <div :class="[item.flexNum?('flex-'+item.flexNum):'p-i-col-'+(i+1)]" v-for="(item,i) in props.titles"
         :key="i"
         >
@@ -349,8 +349,20 @@ watch(
 .flex-6{
     flex:6;
 }
+.flex-7{
+    flex:7;
+}
+.flex-8{
+    flex:8;
+}
+.flex-9{
+    flex:9;
+}
 .flex-b-26{
     flex-basis: 26px;
+}
+.flex-b-50{
+    flex-basis: 50px;
 }
 .flex-b-100{
     flex-basis: 100px;

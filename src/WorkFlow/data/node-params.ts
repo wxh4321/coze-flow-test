@@ -183,3 +183,71 @@ export const textNodeParams = [
     }
 ];
 
+export const conditionNodeParams = [
+    {
+        id:1,
+        list:[
+            // {
+            //     ...condDescParam,
+            // },
+            {
+                type:'select',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                style:{},
+                value:'',
+                placeholder:'请选择',
+                options:[],
+            },
+            {
+                type:'select',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                style:{},
+                value:'',
+                placeholder:'请选择',
+                options:[],
+            },
+            {
+                type:'select',
+                placeholder:'',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'1',
+                options:[
+                    {label:'引用',value:'1'},
+                    {label:'输入',value:'2'}
+                ],
+                style:{
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderRight:true,
+            },
+            {
+                type:'select',
+                noDataText:'暂无数据',
+                warning:'',
+                disabled:false,
+                value:'',
+                placeholder:'请选择',
+                options:[],
+                style:{
+                    marginLeft:'-4px',
+                    width:'calc(100% + 4px)',
+                },
+                cutBorderLeft:true,
+            },
+            {
+                type:'delete-icon',
+                disabled:false,
+                style:{
+                    marginTop:'6px',
+                    fontSize:'20px',
+                }
+            },
+        ]
+    }
+];

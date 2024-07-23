@@ -1,3 +1,12 @@
+// 条件分支图形样式
+export const condDescParam ={
+    type:'cond-desc',
+    name:'',
+    value:'',
+    icon:'arrow-down',
+    style:{},
+}
+// 纯文字样式
 export const inputTextParam = {
     type:'input-text',
     name:'',

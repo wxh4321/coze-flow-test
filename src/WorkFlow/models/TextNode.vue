@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import {
+    DeleteFilled,
+} from '@element-plus/icons-vue'
 import RightIcon from '../icons/RightIcon.vue'
 import NoticeIcon from '../icons/NoticeIcon.vue'
 import AddIcon from '../icons/AddIcon.vue';
@@ -6,6 +9,7 @@ import SettingIcon from '../icons/SettingIcon.vue';
 import ParamsItem from '../basic/ParamsItem.vue'
 import ModelHeaderRight from '../basic/ModelHeaderRight.vue'
 import ModelTreeText from '../basic/ModelTreeText.vue'
+import CustomSelectOptionItem from '../components/CustomSelectOptionItem.vue'
 import { toopTipText12,toopTipText13,toopTipText14 } from '../data/tooltips'
 import { textNodeParams } from '../data/node-params'
 import { inputTextParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
@@ -59,7 +63,7 @@ const textNode:any = ref({
             {label:'逗号',value:'，'},
             {label:'分号',value:'；'},
             {label:'空格',value:' '},
-            {label:'others',value:'others'},
+            {label:'',value:'',type:'others'},
         ],
         placeholder:'选择分隔符',
         noDataText:'暂无数据',
@@ -93,6 +97,11 @@ const textNode:any = ref({
     },
     
 });
+const selectedValue:any = ref(
+    textNode.value.splitString.options
+    .filter((item:any)=>item.value && item.type !== 'others')
+    .map((item:any)=>item.value)
+);
 
 const inputTitles = ref([
     {name:'参数名',flexNum:'3'},
@@ -149,7 +158,45 @@ const addItemInput = () => {
         list: newItemArr
     });
 }
+const useItem = (inputText:string) => {
+    // console.log('useItem ', inputText, selectedValue.value)
+    if(selectedValue.value.includes(inputText)){
+        ElMessage({
+        message: '存在重复的符号...',
+        type: 'warning',
+        });
+        return;
+    }
+    textNode.value.splitString.value.push(inputText);
+    selectedValue.value.push(inputText);
+    // 插入到options中 倒数第二位
+    textNode.value.splitString.options.splice(
+        textNode.value.splitString.options.length-1,0,
+        {
+            label:inputText,
+            value:inputText,
+            type:'custom',
+            checkBoxOptions:{
+                type:'checkbox',
+                value:'',
+                selected:true,
+                placeholder:'',
+                warning:'',
+                disabled:false,
+                style:{},
+            }
+        }
+    );
 
+}
+// 删除字符
+const delSelectItem = (value:string,index:number) => {
+    textNode.value.splitString.options = textNode.value.splitString.options.filter((item:any)=>item.value!==value);
+    selectedValue.value = selectedValue.value.filter((item:string)=>item!==value);
+    setTimeout(()=>{
+        textNode.value.splitString.value = textNode.value.splitString.value.filter((item:any)=>item!==value);
+    },80);
+}
 const openAll = () => {
     collapseArr.forEach(key=>{
         openCollapse.value[key] = true;
@@ -235,6 +282,18 @@ const appSelectChange = (value:string) => {
 }
 const splitSelectChange = (value:any) => {
     console.log('splitSelectChange',value,textNode.value.splitString.value)
+    setTimeout(()=>{ // 利用js事件循环机制
+        textNode.value.splitString.options.forEach((item:any,i:number)=>{
+            if(value.includes(item.value)){
+                // 勾选checkbox
+                textNode.value.splitString.options[i].checkBoxOptions.selected = true;
+            }
+            else{
+                // 取消勾选checkbox
+                textNode.value.splitString.options[i].checkBoxOptions.selected = false;
+            }
+        });
+    },80);
 }
 const selectChange = (options:any) => {
     const { value,i } = options || {};
@@ -437,7 +496,7 @@ onMounted(()=>{
                             <el-select 
                             v-if="textNode.select.value==='2'"
                             multiple
-                            class="t-n-c-result-content-select"
+                            popper-class="t-n-c-result-content-select"
                             v-model="textNode.splitString.value" 
                             :placeholder="textNode.splitString.placeholder" 
                             :disabled="textNode.splitString.disabled"
@@ -447,12 +506,41 @@ onMounted(()=>{
                             >
                                 <el-option
                                     v-for="(oItem,opIndex) in textNode.splitString.options"
-                                    :key="opIndex"
+                                    :key="oItem.value"
                                     :label="oItem.label"
                                     :value="oItem.value"
-                                    style="width: 100%;"
+                                    :disabled="oItem.type==='others'"
                                 >
-                                    <div class="t-n-c-select-option">
+                                    <CustomSelectOptionItem
+                                    v-if="oItem.type==='others'"
+                                    @useItem="useItem"
+                                    />
+                                    <div class="t-n-c-select-option"
+                                    v-else-if="oItem.type==='custom'"
+                                    >
+                                        <el-checkbox v-model="oItem.checkBoxOptions.selected" 
+                                        :disabled="oItem.checkBoxOptions.disabled"
+                                        :style="oItem.checkBoxOptions.style"
+                                        >{{oItem.checkBoxOptions.value}}</el-checkbox>
+                                        <span class="t-n-c-s-o-label">{{oItem.label}}</span>
+                                        <div class="t-n-c-s-o-right">
+                                            <el-tooltip
+                                                :offset="12"
+                                                popper-class="tooltip-box-item-delete"
+                                                effect="light"
+                                                :content="'删除'"
+                                                placement="top"
+                                            >
+                                                <el-icon class="t-n-c-s-o-del-icon"
+                                                @click="delSelectItem(oItem.value,opIndex)"
+                                                ><DeleteFilled /></el-icon>
+                                            </el-tooltip>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="t-n-c-select-option"
+                                    v-else
+                                    >
                                         <el-checkbox v-model="oItem.checkBoxOptions.selected" 
                                         :disabled="oItem.checkBoxOptions.disabled"
                                         :style="oItem.checkBoxOptions.style"
@@ -662,9 +750,7 @@ onMounted(()=>{
     // margin-top: 8px;
     width: 100%;
 }
-.t-n-c-result-content-select{
-    
-}
+
 .t-n-c-select-option{
     display: flex;
     flex-direction: row;
@@ -685,6 +771,16 @@ onMounted(()=>{
     color: rgba(29, 28, 35, .35);
     font-size: 14px;
     margin-left: 4px;
+}
+.t-n-c-s-o-del-icon{
+    color: rgba(56, 55, 67, 0.6);
+    font-weight:600;
+    font-size: 12px;
+    margin-right: 4px;
+}
+.t-n-c-s-o-right{
+    flex: 1;
+    text-align: right;
 }
 .t-n-c-result-nodata{
     width: 100%;
@@ -794,5 +890,20 @@ onMounted(()=>{
 <style>
 div[data-id^="10008-"].vue-flow__node-default{
     width: 507px;
+}
+.t-n-c-result-content-select{
+    border-radius: 8px;
+}
+.t-n-c-result-content-select .el-select-dropdown__item{
+    padding: 0px 12px;
+}   
+.t-n-c-result-content-select .el-select-dropdown__item.is-disabled {
+    cursor: pointer;
+}
+.t-n-c-result-content-select .el-select-dropdown__item.is-selected::after {
+    display: none;
+}
+.tooltip-box-item-delete{
+    --el-color-primary:rgba( 77,83,232 ,1)!important;
 }
 </style>
