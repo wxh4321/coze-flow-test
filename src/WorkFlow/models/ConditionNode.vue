@@ -1,18 +1,24 @@
 <script lang="ts" setup>
+import ArrowDown from '../icons/ArrowDown.vue'
 import RightIcon from '../icons/RightIcon.vue'
 import DragIcon from '../icons/DragIcon.vue'
 import NoticeIcon from '../icons/NoticeIcon.vue'
+import DeleteIcon from '../icons/DeleteIcon.vue';
 import AddIcon from '../icons/AddIcon.vue';
 import ParamsItem from '../basic/ParamsItem.vue'
 import ModelHeaderRight from '../basic/ModelHeaderRight.vue'
 import DraggableList from '../basic/DraggableList.vue'
+import ConditionLine from '../basic/ConditionLine.vue'
 import { toopTipText9,toopTipText10,toopTipText11 } from '../data/tooltips'
 import { conditionNodeParams } from '../data/node-params'
 import { condDescParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
+import { publicTools } from '../data';
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 
 const eventBus = EventBus();
 const openCard = ref(true);
+const listDraggable = ref(false);
 const titleRef:any = ref(null);
 const paramsData:any = ref(conditionNodeParams);
 const currentInstance:any = getCurrentInstance(); 
@@ -34,6 +40,15 @@ const conditionNode:any = ref({
         disabled: false,
         style:{},
     },
+    // 条件分支图例参数
+    condDescParam:{
+        ...condDescParam,
+        icon: markRaw(ArrowDown),
+        name:'且',
+        style:{
+            marginRight:'16px',
+        }
+    },
     // 可拖拽列表数据
     draggableListData:[
         {
@@ -46,18 +61,9 @@ const conditionNode:any = ref({
                 ...JSON.parse(JSON.stringify(conditionNodeParams))
             ]
         },
+        
         {
             id:2,
-            title:'否则如果',
-            label:'优先级',
-            inputTitles,
-            paramsData: [
-                // 深拷贝
-                ...JSON.parse(JSON.stringify(conditionNodeParams))
-            ]
-        },
-        {
-            id:3,
             title:'否则',
             label:'',
             inputTitles:null,
@@ -65,8 +71,39 @@ const conditionNode:any = ref({
         },
     ],
 });
+// 计算是否展示标签 （优先级n）
+const computedShowLabel = computed(() => {
+    return (value:any)=>{
+        const len = conditionNode.value.draggableListData.length;
+        if(value!==null && len>2){
+            return true;
+        }
+        return false;
+    };
+})
+// 计算条件分支是否可删除
+const computedDisabledBranchDelIcon = computed(() => {
+    return (index:number)=>{
+        const len = conditionNode.value.draggableListData.length;
+        if(index===0 && len<=2){
+            return true;
+        }
+        return false;
+    }
+});
+// 是否展示条件分支图例
+const showConditionLine = computed(() => {
+    return (data:any)=>{
+        const list = data?.paramsData||[];
+        const len = list.length;
+        console.log('showConditionLine len ', len);
+        if(len>1){
+            return true;
+        }
+        return false;
+    };
 
-
+});
 
 const emit = defineEmits(['testRun']);
 
@@ -87,9 +124,6 @@ const openOrCloseCard = () => {
 // 新增一条输入框
 const addItem = (index:number) => {
     const newItemArr = [
-        // {
-        //     ...condDescParam,
-        // },
         {
             ...selectParam,
             value:'',
@@ -133,14 +167,52 @@ const addItem = (index:number) => {
             }
         },
     ];
-    const list = conditionNode.value.draggableListData[index].paramsData;
+    const list = conditionNode.value.draggableListData[index]?.paramsData||[];
     const len = list.length;
     const id = len=== 0 ? 1:((list[len - 1] as any)?.id+1);
-    console.log('id arr', id,newItemArr)
     conditionNode.value.draggableListData[index].paramsData.push({
         id,
         list: newItemArr
     });
+}
+const addBranch = () => {
+    console.log('addBranch ', publicTools.dragId)
+    const len = conditionNode.value.draggableListData.length;
+    conditionNode.value.draggableListData.splice(len-1,0,{
+        id: publicTools.dragId++,
+        title:'否则如果',
+        label:'优先级',
+        inputTitles,
+        paramsData: [
+            // 深拷贝
+            ...JSON.parse(JSON.stringify(conditionNodeParams))
+        ]
+    });
+}
+const deleteItem = (params:any,colIndex:number) => {
+    const { item,index } = params||{};
+    const len = conditionNode.value.draggableListData[colIndex]?.paramsData?.length;
+    console.log('deleteItem', item,index,colIndex);
+    console.log('deleteItem len', len);
+    if(len===0){// len 为 0 同时删除当前分支
+        deleteBranch(colIndex);
+    }
+}
+const deleteBranch = (index:number) => {
+    if(computedDisabledBranchDelIcon.value(index)){
+        return;
+    }
+    conditionNode.value.draggableListData.splice(index,1);
+    if(index===0){
+        // 删除第一条时，重置第一条title = '如果'
+        setItem(0,-1,-1,{
+            title:'如果'
+        });
+        // 使得删除按钮不可用
+        setItem(0,0,4,{
+            disabled:true
+        });
+    }
 }
 const selectChange = (options:any,index:number) => {
     const { value,i } = options || {};
@@ -176,7 +248,62 @@ const selectChange = (options:any,index:number) => {
         };
     }
 }
+const setItem = (index:number,i:number,j:number,data={}) => {
+    if(i==-1){
+        const obj = conditionNode.value.draggableListData[index];
+        if(obj){
+            conditionNode.value.draggableListData[index] = {
+                ...JSON.parse(JSON.stringify(obj)),
+                ...data
+            };
+        }
+        
+    }
+    else if(j==-1){
+        const obj = conditionNode.value.draggableListData[index]?.paramsData[i];
+        if(obj){
+            conditionNode.value.draggableListData[index].paramsData[i] = {
+                ...JSON.parse(JSON.stringify(obj)),
+                ...data
+            };
+        }
+    }
+    else{
+        const obj = conditionNode.value.draggableListData[index]?.paramsData[i]?.list[j];
+        if(obj){
+            conditionNode.value.draggableListData[index].paramsData[i].list[j] = {
+                ...obj,
+                ...data
+            };
+        }
+        
+    }
+    
+}
 
+const dragMousedown = ()=>{
+    console.log('dragMousedown');
+    listDraggable.value = true;
+    // 设置当前节点为可拖拽
+    // eventBus.emit('makeDraggable', {id: ctx.$parent.id});
+}
+const dragMouseleave = ()=>{
+    console.log('dragMouseleave');
+    listDraggable.value = false;
+    // 设置当前节点为可拖拽
+    // eventBus.emit('makeDraggable', {id: ctx.$parent.id});
+}
+const handleMousedown = ()=>{
+    console.log('handleMousedown');
+    listDraggable.value = false;
+}
+
+onMounted(()=>{
+    // 使得删除按钮不可用
+    setItem(0,0,4,{
+        disabled:true
+    });
+});
 </script>
 <template>
     <div class="cond-model-node-wrapper">
@@ -205,29 +332,62 @@ const selectChange = (options:any,index:number) => {
                 <span>连接多个下游分支，若设定的条件成立则仅运行对应的分支，若均不成立则只运行“否则”分支</span>
             </div>
         </div>
-        
+        <div class="cond-model-node-branch-title mb12">
+            <span class="c-m-n-title-text">条件分支</span>
+            <div class="c-m-n-title-right"  @click="addBranch">
+                <el-button class="c-m-n-add-icon" 
+                :icon="AddIcon"
+                />
+                <span class="c-m-n-r-text">新增分支</span>
+            </div>
+        </div>
         <div class="cond-model-node-content" v-if="openCard">
             <DraggableList 
-            :draggable="true" 
+            :draggable="listDraggable" 
             :draggableList="conditionNode.draggableListData"
             :listClass="'cond-model-node-content-item'"
             >
-                <template #title="{ data,index }:{ data:any,index:number }">
-                    <el-button class="cm-n-drag-icon" 
-                    :icon="DragIcon"
-                    />
-                    <span class="cm-n-c-text">{{data.title}}</span>
-                    <div class="cm-n-c-label" v-if="data.inputTitles">{{data.label}}{{index+1}}</div>
-                </template>
                 <template #default="{data,index}:{ data:any,index:number }">
-                    <div>
-                        <ParamsItem 
-                        :data="data.paramsData"
-                        :key="'cmInput'+data.id"
-                        :titles="data.inputTitles"
-                        :showAddIcon="data.inputTitles!==null"
-                        @addItem="addItem(index)"
-                        @selectChange="(o:any)=>{selectChange(o,index)}"
+                    <div class="cm-n-drag-title">
+                        <el-button class="cm-n-drag-icon" 
+                        :icon="DragIcon"
+                        @mousedown="dragMousedown"
+                        @mouseleave="dragMouseleave"
+                        />
+                        <span class="cm-n-c-text">{{data.title}}</span>
+                        <div class="cm-n-c-label" v-if="computedShowLabel(data.inputTitles)">{{data.label}}{{index+1}}</div>
+                        <div class="cm-n-c-right" v-if="data.inputTitles!==null">
+                            <el-icon class="cm-n-c-delete-icon" 
+                            :class="[computedDisabledBranchDelIcon(index)?'cm-n-c-delete-icon-disabled':'']"
+                            @click="deleteBranch(index)"
+                            :style="{}"
+                            >
+                                <DeleteIcon />
+                            </el-icon>
+                        </div>
+                    </div>
+                    <div class="cm-n-drag-main">
+                        <ConditionLine
+                        v-if="showConditionLine(data)"
+                        :data="conditionNode.condDescParam"
+                        />
+                        <div class="cm-n-drag-content">
+                            <ParamsItem 
+                            :data="data.paramsData"
+                            :key="'cmInput'+data.id"
+                            :titles="data.inputTitles"
+                            :showAddIcon="data.inputTitles!==null"
+                            @addItem="addItem(index)"
+                            @deleteItem="(data:any)=>deleteItem(data,index)"
+                            @selectChange="(o:any)=>selectChange(o,index)"
+                            />
+                        </div>
+                        <!-- 右边的handle节点 -->
+                        <Handle :id="'target-'+data.id" type="source" 
+                        :key="'target-'+data.id"
+                        @mousedown="handleMousedown"
+                        :position="Position.Right" 
+                        :connectable="true" 
                         />
                     </div>
                 </template>
@@ -241,6 +401,7 @@ const selectChange = (options:any,index:number) => {
     --el-color-primary-light-9: #F4EBEB !important;
     --el-color-primary:rgba( 77,83,232 ,1)!important;
     --el-color-primary1:rgba( 77,83,232 ,1);
+    --semi-color-primary:rgba( 77,83,232,1)!important;
     --el-dropdown-menuItem-hover-color:rgba( 77,83,232 ,1);
     list-style: disc;
 }
@@ -263,6 +424,7 @@ const selectChange = (options:any,index:number) => {
     font-size: 12px;
     margin-left: 4px;
 }
+
 .cm-n-c-icon{
     @extend .basic-n-t-icon;
     margin-right: 0px;
@@ -308,10 +470,46 @@ const selectChange = (options:any,index:number) => {
 .cond-model-node-header{
     margin-bottom: 16px;
 }
+.mb12{
+    margin-bottom: 12px;
+}
+.cond-model-node-branch-title,
 .cond-model-node-title{
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+.cond-model-node-branch-title{
+    justify-content: space-between;
+}
+.c-m-n-title-text{
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+}
+.c-m-n-title-right{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+.c-m-n-r-text{
+    font-size: 12px;
+    color: var(--semi-color-primary);
+}
+.c-m-n-add-icon{
+    cursor: pointer !important;
+    color: var(--el-color-primary1);
+    font-weight: 600;
+    padding: 4px!important;
+    height: 22px;
+    font-size: 14px;
+    // margin-right: 8px;
+    border-color: transparent;
+    background-color: transparent;
+    // &:hover{
+    //     background-color: var(--el-color-primary-light-9);
+    // }
 }
 .cond-model-node-subtitle{
     color: rgba(28, 29, 35, .6);
@@ -353,6 +551,26 @@ const selectChange = (options:any,index:number) => {
     background-color: rgba(139, 139, 149, 0.15);
     border-radius: 8px;
 }
+.cm-n-c-right{
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+.cm-n-c-delete-icon{
+    // margin-left: 2px;
+    flex-basis: 26px;
+    margin-top: 9px;
+    color: #888d92;
+    cursor: pointer;
+    font-size: 20px;
+    &-disabled{
+        color: rgb(217, 220, 250);
+        cursor: not-allowed;
+    }
+}
+
 .cm-n-c-result-content{
     // margin-top: 8px;
     width: 100%;
@@ -366,7 +584,22 @@ const selectChange = (options:any,index:number) => {
     padding: 12px 0px;
     line-height:18px;
 }
-
+.cm-n-drag-content{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.cm-n-drag-title{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+.cm-n-drag-main{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
 .cm-n-drag-icon{
     @extend .cm-n-t-icon;
     margin-right: 0px;
@@ -466,13 +699,16 @@ const selectChange = (options:any,index:number) => {
 div[data-id^="10007-"].vue-flow__node-default{
     width: 850px;
 }
+div[data-id^="10007-"] div[data-handlepos="right"]:not(div[data-handleid^="target-"]) {
+   display: none;
+}
 .cond-model-node-content-item{
     background: rgba(46, 46, 56, .04);
     border-radius: 8px;
     box-sizing: border-box;
     margin-bottom: 8px;
     padding: 12px;
-    position: relative;
     width: 100%;
+    position: relative;
 }
 </style>

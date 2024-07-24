@@ -187,9 +187,6 @@ export const conditionNodeParams = [
     {
         id:1,
         list:[
-            // {
-            //     ...condDescParam,
-            // },
             {
                 type:'select',
                 noDataText:'暂无数据',

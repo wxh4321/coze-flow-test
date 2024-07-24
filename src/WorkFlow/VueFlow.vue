@@ -6,6 +6,7 @@ import { Background, BackgroundVariant } from '@vue-flow/background'
 import { debounce } from '../utils'
 const { 
   nodes,edges, 
+  getNodes, getEdges, findNode, findEdge,
   addNodes, updateNode, 
   addEdges,updateEdge, 
   removeNodes, removeEdges,
@@ -122,6 +123,9 @@ const addRandomNode = (nodeId:string,position:any) => {
 }
 const dragNodeData:any = ref({});
 const addNodeDebounce = debounce(() => {
+    if(!dragNodeData.value.id){
+      return;
+    }
     console.log('add node', dragNodeData.value.id+'-'+(vueFlowNodeId));
     addRandomNode(dragNodeData.value.id,dragNodeData.value.position);
 },500)
@@ -145,14 +149,34 @@ eventBus.on('deleteNode', (data: any) => {
     console.log('delete node',data.id||'');
     removeNodes(data.id);
 });
+// 设置当前节点为可拖拽
+eventBus.on('makeDraggable', (data: any) => {
+    console.log('makeNodeDraggable ',data.id||'');
+    const node:any = {
+      ...(findNode(data.id))
+    };
+    node.draggable = true;
+    console.log('node ',node);
+    updateNode(data.id,node);
+});
+// 设置当前节点为不可拖拽
+eventBus.on('disabledDraggable', (data: any) => {
+    console.log('disabledNodeDraggable',data.id||'');
+    const node:any = {
+      ...(findNode(data.id))
+    };
+    node.draggable = false;
+    console.log('node ',node);
+    updateNode(data.id,node);
+});
 // 打开知识库弹窗
 eventBus.on('openKnowledgeDialog', (data: any) => {
   dialogVisible.value = true;
 });
-onMounted(()=>{
-    addStartNode();
-    addEndNode();
-});
+// onMounted(()=>{
+//     addStartNode();
+//     addEndNode();
+// });
 // watch(
 //   () => localNodes.value,
 //   (newValue:any)=>{
@@ -190,6 +214,7 @@ onMounted(()=>{
 
 </style>
 <style>
+
 .vue-flow__node-default{
     background: #fff;
     border: 1px solid rgba(28, 31, 35, .08);
