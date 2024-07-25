@@ -124,7 +124,7 @@ onMounted(()=>{
                         <span class="s-n-c-text">输入</span>
                         <el-tooltip
                             :offset="12"
-                            class="tooltip-box-item"
+                            popper-class="tooltip-box-item-in-node"
                             effect="dark"
                             :content="toopTipText"
                             placement="top"
@@ -136,7 +136,7 @@ onMounted(()=>{
                         <div class="s-n-c-right">
                             <el-tooltip
                             :offset="12"
-                            class="tooltip-box-item"
+                            popper-class="tooltip-box-item-in-node"
                             effect="dark"
                             :content="toopTipText1"
                             placement="top"
@@ -291,4 +291,5 @@ div[data-id^="10000-"].vue-flow__node-default{
 div[data-id^="10000-"] div[data-handlepos="left"]{
    display: none;
 }
+
 </style>

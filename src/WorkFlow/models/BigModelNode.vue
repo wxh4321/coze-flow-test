@@ -22,8 +22,8 @@ const titleRef:any = ref(null);
 const collapseArr = ['input','notice','output'];
 const paramsData = ref(bigModelInputNodeParams);
 const paramsData1 = ref(bigModelOutputNodeParams);
-const modeRef:any = ref(null);
-
+const currentInstance:any = getCurrentInstance(); 
+const ctx = currentInstance.ctx;
 
 const bigModelNode = ref({
     input:{
@@ -224,9 +224,7 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    const parent = modeRef.value.parentNode;
-    const id = parent.getAttribute('data-id');
-    eventBus.emit('deleteNode', {id});
+    eventBus.emit('deleteNode', {id: ctx.$parent.id});
 }
 
 const userSetting = () => {
@@ -250,7 +248,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="big-model-node-wrapper" ref="modeRef">
+    <div class="big-model-node-wrapper">
         <div :class="[openCard?'big-model-node-header':'']">
             <div class="big-model-node-title">
                 <el-button class="bm-n-t-icon" 
@@ -292,7 +290,7 @@ onMounted(()=>{
                             <span class="bm-n-c-text">输入</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText5"
                                 placement="top"
@@ -331,7 +329,7 @@ onMounted(()=>{
                             <span class="bm-n-c-text">提示词</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText6"
                                 placement="top"
@@ -343,7 +341,7 @@ onMounted(()=>{
                             <div class="bm-n-c-header-right">
                                 <el-tooltip
                                     :offset="12"
-                                    class="tooltip-box-item"
+                                    popper-class="tooltip-box-item-in-node"
                                     effect="dark"
                                     :content="toopTipText8"
                                     placement="top"
@@ -376,7 +374,7 @@ onMounted(()=>{
                             <span class="bm-n-c-text">输出</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText7"
                                 placement="top"
@@ -422,6 +420,7 @@ onMounted(()=>{
                                 v-if="bigModelNode.output.export.tabindex===2"
                                 :offset="12"
                                 class="tooltip-box-item-export"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText1"
                                 placement="top"

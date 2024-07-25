@@ -22,7 +22,8 @@ const openCollapseArr:any = ref([]);
 const titleRef:any = ref(null);
 const collapseArr = ['input','string','output'];
 const paramsData:any = ref(textNodeParams);
-const modeRef:any = ref(null);
+const currentInstance:any = getCurrentInstance(); 
+const ctx = currentInstance.ctx;
 
 const textNode:any = ref({
     input:{
@@ -247,9 +248,7 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    const parent = modeRef.value.parentNode;
-    const id = parent.getAttribute('data-id');
-    eventBus.emit('deleteNode', {id});
+    eventBus.emit('deleteNode', {id: ctx.$parent.id});
 }
 
 const settingString = () => {
@@ -347,7 +346,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="text-node-wrapper" ref="modeRef">
+    <div class="text-node-wrapper">
         <div :class="[openCard?'text-node-header':'']">
             <div class="text-node-title">
                 <el-button class="t-n-t-icon" 
@@ -377,7 +376,7 @@ onMounted(()=>{
             <div class="t-n-s-a-title">
                 <el-tooltip
                     :offset="12"
-                    class="tooltip-box-item"
+                    popper-class="tooltip-box-item-in-node"
                     effect="dark"
                     :content="'选择应用'"
                     placement="top"
@@ -416,7 +415,7 @@ onMounted(()=>{
                             <span class="t-n-c-text">输入</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText12"
                                 placement="top"
@@ -464,7 +463,7 @@ onMounted(()=>{
                             <el-tooltip
                                 v-if="textNode.select.value==='2'"
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText14"
                                 placement="top"
@@ -565,7 +564,7 @@ onMounted(()=>{
                             <span class="t-n-c-text">输出</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText13"
                                 placement="top"

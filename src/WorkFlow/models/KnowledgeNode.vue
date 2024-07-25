@@ -16,7 +16,8 @@ const openCollapseArr:any = ref([]);
 const titleRef:any = ref(null);
 const collapseArr = ['input','knowledge','output'];
 const paramsData:any = ref(knowledgeNodeParams);
-const modeRef:any = ref(null);
+const currentInstance:any = getCurrentInstance(); 
+const ctx = currentInstance.ctx;
 
 const knowledgeNode = ref({
     input:{
@@ -105,9 +106,7 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    const parent = modeRef.value.parentNode;
-    const id = parent.getAttribute('data-id');
-    eventBus.emit('deleteNode', {id});
+    eventBus.emit('deleteNode', {id: ctx.$parent.id});
 }
 
 const addKnow = () => {
@@ -154,7 +153,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="know-model-node-wrapper" ref="modeRef">
+    <div class="know-model-node-wrapper">
         <div :class="[openCard?'know-model-node-header':'']">
             <div class="know-model-node-title">
                 <el-button class="km-n-t-icon" 
@@ -196,7 +195,7 @@ onMounted(()=>{
                             <span class="km-n-c-text">输入</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText9"
                                 placement="top"
@@ -227,7 +226,7 @@ onMounted(()=>{
                             <span class="km-n-c-text">知识库</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText10"
                                 placement="top"
@@ -259,7 +258,7 @@ onMounted(()=>{
                             <span class="km-n-c-text">输出</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText11"
                                 placement="top"

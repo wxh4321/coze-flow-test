@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
-import { VueFlow, useVueFlow, Position, MarkerType } from '@vue-flow/core';
+import type { Elements, FlowEvents, Node, SnapGrid, Styles, VueFlowStore } from '@vue-flow/core'
+import { VueFlow, useVueFlow, Position } from '@vue-flow/core';
 import { Background, BackgroundVariant } from '@vue-flow/background'
+import FlowControls from './controls/FlowControls.vue';
+
 import { debounce } from '../utils'
 const { 
   nodes,edges, 
@@ -53,10 +56,16 @@ onConnect((params:any)=>{
   params = {
     ...params,
     updatable: true,
-    // markerEnd: MarkerType.Arrow,
+    type:'',
+    // type: 'step', // 折线
+    // markerEnd: { 
+    //   type: MarkerType.Arrow,
+    //   color:'currentColor'
+    // }
   };
   addEdges([params]);
 })
+
 onEdgeUpdateStart((params:any)=>{
   console.log('onEdgeUpdateStart ', params.edge)
 });
@@ -173,10 +182,13 @@ eventBus.on('disabledDraggable', (data: any) => {
 eventBus.on('openKnowledgeDialog', (data: any) => {
   dialogVisible.value = true;
 });
-// onMounted(()=>{
-//     addStartNode();
-//     addEndNode();
-// });
+const onMoveEnd = (e: FlowEvents['moveEnd']) => {
+  console.log('zoom/move end', e.flowTransform)
+}
+onMounted(()=>{
+    addStartNode();
+    addEndNode();
+});
 // watch(
 //   () => localNodes.value,
 //   (newValue:any)=>{
@@ -195,11 +207,12 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
 <template>
     <VueFlow 
     @dragleave="vueFlowDragLeave"
+    @onMoveEnd="onMoveEnd"
     :nodes="localNodes" 
     :edges="localEdges"
     >
     <!-- <MiniMap /> -->
-    <!-- <Controls /> -->
+    <FlowControls />
     <Background :variant="BackgroundVariant.Dots" />
     <!-- <button type="button" :style="{ position: 'absolute', left: '10px', top: '10px', zIndex: 4 }" @click="addRandomNode">
       add node
@@ -214,7 +227,16 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
 
 </style>
 <style>
-
+:root {
+  --vf-node-bg: #fff;
+  --vf-node-text: #222;
+  --vf-connection-path: #37d0ff;
+  --vf-handle: #555;
+}
+.tooltip-box-item-in-node{
+    max-width: 400px;
+    border-radius: 6px;
+}
 .vue-flow__node-default{
     background: #fff;
     border: 1px solid rgba(28, 31, 35, .08);
@@ -236,6 +258,7 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
 .vue-flow__edge-path{
   stroke: #4d53e8;
   stroke-width: 2;
+  color: #4d53e8;
 }
 /* .vue-flow__edge-default.selected{
   stroke: #37d0ff;

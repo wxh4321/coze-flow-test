@@ -31,8 +31,6 @@ const inputTitles = [
     {name:'',flexNum:'5'},
     {name:'',flexNum:'b-26'}
 ];
-const modeRef:any = ref(null);
-
 const conditionNode:any = ref({
     title:{
         type:'input',
@@ -118,9 +116,7 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    const parent = modeRef.value.parentNode;
-    const id = parent.getAttribute('data-id');
-    eventBus.emit('deleteNode', {id});
+    eventBus.emit('deleteNode', {id: ctx.$parent.id});
 }
 const openOrCloseCard = () => {
     openCard.value = !openCard.value;
@@ -310,7 +306,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="cond-model-node-wrapper" ref="modeRef">
+    <div class="cond-model-node-wrapper">
         <div :class="[openCard?'cond-model-node-header':'']">
             <div class="cond-model-node-title">
                 <el-button class="cm-n-t-icon" 
@@ -336,7 +332,7 @@ onMounted(()=>{
                 <span>连接多个下游分支，若设定的条件成立则仅运行对应的分支，若均不成立则只运行“否则”分支</span>
             </div>
         </div>
-        <div class="cond-model-node-branch-title mb12">
+        <div class="cond-model-node-branch-title" v-if="openCard">
             <span class="c-m-n-title-text">条件分支</span>
             <div class="c-m-n-title-right"  @click="addBranch">
                 <el-button class="c-m-n-add-icon" 
@@ -345,7 +341,7 @@ onMounted(()=>{
                 <span class="c-m-n-r-text">新增分支</span>
             </div>
         </div>
-        <div class="cond-model-node-content" v-if="openCard">
+        <div class="cond-model-node-content mt12">
             <DraggableList 
             :draggable="listDraggable" 
             :draggableList="conditionNode.draggableListData"
@@ -370,7 +366,7 @@ onMounted(()=>{
                             </el-icon>
                         </div>
                     </div>
-                    <div class="cm-n-drag-main">
+                    <div class="cm-n-drag-main" v-if="openCard">
                         <ConditionLine
                         v-if="showConditionLine(data)"
                         :data="conditionNode.condDescParam"
@@ -473,6 +469,9 @@ onMounted(()=>{
 }
 .cond-model-node-header{
     margin-bottom: 16px;
+}
+.mt12{
+    margin-top: 12px;
 }
 .mb12{
     margin-bottom: 12px;

@@ -181,7 +181,7 @@ onMounted(()=>{
                             <span class="e-n-c-text">输出变量</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText2"
                                 placement="top"
@@ -210,7 +210,7 @@ onMounted(()=>{
                             <span class="e-n-c-text">回答内容</span>
                             <el-tooltip
                                 :offset="12"
-                                class="tooltip-box-item"
+                                popper-class="tooltip-box-item-in-node"
                                 effect="dark"
                                 :content="toopTipText4"
                                 placement="top"
@@ -223,7 +223,7 @@ onMounted(()=>{
                                 <span class="e-n-c-text">流式输出</span>
                                 <el-tooltip
                                     :offset="12"
-                                    class="tooltip-box-item"
+                                    popper-class="tooltip-box-item-in-node"
                                     effect="dark"
                                     :content="toopTipText3"
                                     placement="top"
