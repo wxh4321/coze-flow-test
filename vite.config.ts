@@ -8,6 +8,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
+  base: '/coze-flow-test/',
   resolve: {
     dedupe: ['vue'],
   },
