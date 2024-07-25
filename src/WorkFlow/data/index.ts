@@ -10,6 +10,7 @@ import iconMessager from '../images/icon-messager.png';
 import iconVariable from '../images/icon-variable.png';
 import iconDatabase from '../images/icon-database.png';
 
+
 export const modelItemDatas = [
     {
         type:'api',
@@ -100,3 +101,8 @@ export const modelItemDatas = [
         tooltip:'可支持对 Database 放开读写控制，用户可读写其他用户提交的数据，由开发者控制。需要提前在 Bot 的 Database 中添加 Table。'
     },
 ];
+
+export const publicTools ={
+    // 可拖拽组件的列表的公共id
+    dragId:3 // 1 2 已有，所以从3开始
+};
