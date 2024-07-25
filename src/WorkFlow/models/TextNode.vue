@@ -22,8 +22,7 @@ const openCollapseArr:any = ref([]);
 const titleRef:any = ref(null);
 const collapseArr = ['input','string','output'];
 const paramsData:any = ref(textNodeParams);
-const currentInstance:any = getCurrentInstance(); 
-const ctx = currentInstance.ctx;
+const modeRef:any = ref(null);
 
 const textNode:any = ref({
     input:{
@@ -248,7 +247,9 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    eventBus.emit('deleteNode', {id: ctx.$parent.id});
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    eventBus.emit('deleteNode', {id});
 }
 
 const settingString = () => {
@@ -346,7 +347,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="text-node-wrapper">
+    <div class="text-node-wrapper" ref="modeRef">
         <div :class="[openCard?'text-node-header':'']">
             <div class="text-node-title">
                 <el-button class="t-n-t-icon" 

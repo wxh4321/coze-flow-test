@@ -31,6 +31,8 @@ const inputTitles = [
     {name:'',flexNum:'5'},
     {name:'',flexNum:'b-26'}
 ];
+const modeRef:any = ref(null);
+
 const conditionNode:any = ref({
     title:{
         type:'input',
@@ -116,7 +118,9 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    eventBus.emit('deleteNode', {id: ctx.$parent.id});
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    eventBus.emit('deleteNode', {id});
 }
 const openOrCloseCard = () => {
     openCard.value = !openCard.value;
@@ -306,7 +310,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="cond-model-node-wrapper">
+    <div class="cond-model-node-wrapper" ref="modeRef">
         <div :class="[openCard?'cond-model-node-header':'']">
             <div class="cond-model-node-title">
                 <el-button class="cm-n-t-icon" 

@@ -22,8 +22,8 @@ const titleRef:any = ref(null);
 const collapseArr = ['input','notice','output'];
 const paramsData = ref(bigModelInputNodeParams);
 const paramsData1 = ref(bigModelOutputNodeParams);
-const currentInstance:any = getCurrentInstance(); 
-const ctx = currentInstance.ctx;
+const modeRef:any = ref(null);
+
 
 const bigModelNode = ref({
     input:{
@@ -224,7 +224,9 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    eventBus.emit('deleteNode', {id: ctx.$parent.id});
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    eventBus.emit('deleteNode', {id});
 }
 
 const userSetting = () => {
@@ -248,7 +250,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="big-model-node-wrapper">
+    <div class="big-model-node-wrapper" ref="modeRef">
         <div :class="[openCard?'big-model-node-header':'']">
             <div class="big-model-node-title">
                 <el-button class="bm-n-t-icon" 
