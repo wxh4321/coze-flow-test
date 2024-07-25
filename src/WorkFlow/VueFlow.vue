@@ -139,6 +139,14 @@ const addNodeDebounce = debounce(() => {
     addRandomNode(dragNodeData.value.id,dragNodeData.value.position);
 },500)
 
+const localNodesDebounce = debounce((nodes:any) => {
+  console.log('localNodes ',nodes);
+},500);
+
+const localEdgesDebounce = debounce((edges:any) => {
+    console.log('localEdges ',edges);
+},500);
+
 const vueFlowDragLeave = (event:any) => {
   addNodeDebounce();
 }
@@ -189,20 +197,20 @@ onMounted(()=>{
     addStartNode();
     addEndNode();
 });
-// watch(
-//   () => localNodes.value,
-//   (newValue:any)=>{
-//     console.log('update nodes',newValue);
-//   },
-//   { immediate: true, deep: true }
-// );
-// watch(
-//   () => localEdges.value,
-//   (newValue:any)=>{
-//     console.log('update edges',newValue);
-//   },
-//   { immediate: true, deep: true }
-// );
+watch(
+  () => localNodes.value,
+  (newValue:any)=>{
+    localNodesDebounce(newValue);
+  },
+  { immediate: true, deep: true }
+);
+watch(
+  () => localEdges.value,
+  (newValue:any)=>{
+    localEdgesDebounce(newValue);
+  },
+  { immediate: true, deep: true }
+);
 </script>
 <template>
     <VueFlow 

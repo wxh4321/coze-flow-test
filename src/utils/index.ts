@@ -7,8 +7,8 @@
  */
 export function debounce(fuc: any, wait: any, immediate = false) {
   let timer: any = null //计时器
-  function tf() {
-    let arg = arguments //保存调用参数
+  function tf(...args: any[]) {
+    let arg = args //保存调用参数
     let context = this //保存调用函数时的this
     if (timer) clearTimeout(timer) //每次进该函数都需要清除原有计时器
     if (immediate) {

@@ -16,8 +16,8 @@ const openCollapseArr:any = ref([]);
 const titleRef:any = ref(null);
 const collapseArr = ['input','knowledge','output'];
 const paramsData:any = ref(knowledgeNodeParams);
-const currentInstance:any = getCurrentInstance(); 
-const ctx = currentInstance.ctx;
+const modeRef:any = ref(null);
+
 
 const knowledgeNode = ref({
     input:{
@@ -106,7 +106,9 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    eventBus.emit('deleteNode', {id: ctx.$parent.id});
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    eventBus.emit('deleteNode', {id});
 }
 
 const addKnow = () => {
@@ -153,7 +155,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="know-model-node-wrapper">
+    <div class="know-model-node-wrapper" ref="modeRef">
         <div :class="[openCard?'know-model-node-header':'']">
             <div class="know-model-node-title">
                 <el-button class="km-n-t-icon" 

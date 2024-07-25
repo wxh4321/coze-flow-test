@@ -12,9 +12,6 @@ const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const paramsData = ref(startNodeParams);
-const startNode = ref({
-    inputParams:paramsData.value,
-});
 
 const collapseArr = ['input'];
 const openAll = () => {

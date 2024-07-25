@@ -21,8 +21,8 @@ const openCard = ref(true);
 const listDraggable = ref(false);
 const titleRef:any = ref(null);
 const paramsData:any = ref(conditionNodeParams);
-const currentInstance:any = getCurrentInstance(); 
-const ctx = currentInstance.ctx;
+const modeRef:any = ref(null);
+
 const inputTitles = [
     // {name:'',flexNum:'b-50'}, // 条件分支
     {name:'引用变量',flexNum:'3'},
@@ -116,7 +116,9 @@ const reName = () => {
 }
 const deleteNode = () => {
     // 获取需要删除的nodeid
-    eventBus.emit('deleteNode', {id: ctx.$parent.id});
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    eventBus.emit('deleteNode', {id});
 }
 const openOrCloseCard = () => {
     openCard.value = !openCard.value;
@@ -306,7 +308,7 @@ onMounted(()=>{
 });
 </script>
 <template>
-    <div class="cond-model-node-wrapper">
+    <div class="cond-model-node-wrapper" ref="modeRef">
         <div :class="[openCard?'cond-model-node-header':'']">
             <div class="cond-model-node-title">
                 <el-button class="cm-n-t-icon" 
