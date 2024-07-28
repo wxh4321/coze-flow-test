@@ -13,7 +13,7 @@ export const toopTipText11 = '输出列表在是所有选定知识中召回的�
 export const toopTipText12 = '请输入字符串类型参数，这些参数可以被用于处理特定格式';
 export const toopTipText13 = '处理后的字符串输出结果';
 export const toopTipText14 = '分隔文本的符号（注意区分全半角符号），分隔后将自动变成字符串数组。';
-
+export const toopTipText15 = '预置字符默认为转义字符，自定义字符输入默认为非转义字符';
 
 
 
