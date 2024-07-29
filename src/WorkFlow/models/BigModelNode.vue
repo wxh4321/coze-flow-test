@@ -24,7 +24,7 @@ const paramsData = ref(bigModelInputNodeParams);
 const paramsData1 = ref(bigModelOutputNodeParams);
 
 const modeRef:any = ref(null);
-
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const bigModelNode = ref({
     openCard:openCard.value,
     input:{
@@ -85,7 +85,10 @@ const bigModelNode = ref({
         streamOutputValue:false,
     }
 });
-
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
+});
 const inputTitles = ref([
     {name:'参数名',flexNum:'4'},
     {name:'变量值',flexNum:'2'},

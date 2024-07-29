@@ -31,7 +31,9 @@ const inputTitles = [
     {name:'',flexNum:'5'},
     {name:'',flexNum:'b-26'}
 ];
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const conditionNode:any = ref({
+    openCard:openCard.value,
     title:{
         type:'input',
         value:'选择器',
@@ -70,6 +72,10 @@ const conditionNode:any = ref({
             paramsData: []
         },
     ],
+});
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
 });
 // 计算是否展示标签 （优先级n）
 const computedShowLabel = computed(() => {

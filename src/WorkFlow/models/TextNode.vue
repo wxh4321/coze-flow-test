@@ -25,7 +25,9 @@ const collapseArr = ['input', 'string', 'output'];
 const paramsData: any = ref(textNodeParams);
 const modeRef: any = ref(null);
 
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const textNode: any = ref({
+    openCard:openCard.value,
     input: {
         inputParams: paramsData.value,
     },
@@ -96,6 +98,10 @@ const textNode: any = ref({
         style: {},
     },
 
+});
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
 });
 const selectedValue: any = ref(
     textNode.value.splitString.options
@@ -378,7 +384,7 @@ onUnmounted(() => {
                 <span>用于处理多个字符串类型变量的格式</span>
             </div>
         </div>
-        <div class="text-node-select-app">
+        <div class="text-node-select-app" v-if="openCard">
             <div class="t-n-s-a-title">
                 <el-tooltip :offset="12" popper-class="tooltip-box-item-in-node" effect="dark" :content="'选择应用'"
                     placement="top">

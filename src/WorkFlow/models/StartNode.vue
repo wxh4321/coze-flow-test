@@ -6,13 +6,23 @@ import ParamsItem from '../basic/ParamsItem.vue'
 import { toopTipText, toopTipText1 } from '../data/tooltips'
 import { startNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
+import { EventBus } from '../../utils/EventBus'
 
+const eventBus = EventBus();
 
 const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const paramsData = ref(startNodeParams);
 
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
+const startNode = ref({
+    openCard:openCard.value,
+});
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
+});
 const collapseArr = ['input'];
 const openAll = () => {
     collapseArr.forEach(key=>{

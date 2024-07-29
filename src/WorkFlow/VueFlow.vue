@@ -8,6 +8,17 @@ import FlowControls from './controls/FlowControls.vue';
 
 import { debounce } from '../utils'
 const {
+  nodesDraggable,
+  nodesConnectable,
+  elementsSelectable,
+  setInteractive,
+  zoomTo,
+  zoomIn,
+  zoomOut,
+  fitView,
+  viewport,
+  minZoom,
+  maxZoom,
   nodes, edges,
   getNodes, getEdges, findNode, findEdge,
   addNodes, updateNode,
@@ -28,12 +39,19 @@ import TextNode from './models/TextNode.vue'
 import ConditionNode from './models/ConditionNode.vue'
 
 import { EventBus } from '../utils/EventBus';
+
+const isInteractive = toRef(() => nodesDraggable.value || nodesConnectable.value || elementsSelectable.value)
+
+const minZoomReached = toRef(() => viewport.value.zoom <= minZoom.value)
+
+const maxZoomReached = toRef(() => viewport.value.zoom >= maxZoom.value)
+
 const VueFlowData = {
   id: 1
 };
 const localNodes: any = ref(nodes);
 const localEdges: any = ref(edges);
-
+const flowData:any = ref({});
 const eventBus = EventBus();
 const dialogVisible = ref(false);
 const updatedEdge: any = ref(null);
@@ -65,6 +83,10 @@ const changeEdgeParams = (edge:GraphEdge,payload:any) => {
   }
   updateEdge(newEdge, connection);
 }
+
+const emit = defineEmits(['setData']);
+
+
 onEdgeClick((params: any) => {
   console.log('onEdgeClick params ', params)
   changeEdgeParams(params.edge,{
@@ -184,12 +206,18 @@ const addNodeDebounce = debounce(() => {
 }, 500)
 
 const localNodesDebounce = debounce((nodes: any) => {
-  console.log('localNodes ', nodes);
-}, 500);
+  // console.log('localNodes ', nodes);
+  flowData.value.nodes = nodes;
+}, 100);
 
 const localEdgesDebounce = debounce((edges: any) => {
-  console.log('localEdges ', edges);
-}, 500);
+  // console.log('localEdges ', edges);
+  flowData.value.edges = edges;
+}, 100);
+
+const flowDataDebounce = debounce((data:any)=>{
+  emit('setData',data);
+},100);
 
 const vueFlowDragLeave = (event: any) => {
   addNodeDebounce();
@@ -217,7 +245,6 @@ eventBus.on('makeDraggable', (data: any) => {
     ...(findNode(data.id))
   };
   node.draggable = true;
-  console.log('node ', node);
   updateNode(data.id, node);
 });
 // 设置当前节点为不可拖拽
@@ -237,9 +264,74 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
 const onMoveEnd = (e: FlowEvents['moveEnd']) => {
   console.log('zoom/move end', e.flowTransform)
 }
+
+// 后退
+const backStep = () => {
+    console.log('backStep');
+}
+// 前进
+const forwardStep = () => {
+    console.log('forwardStep');
+}
+// 缩小画布
+const minusFlow = () => {
+    if(minZoomReached.value){
+        return;
+    }
+    zoomPercent.value -= 0.1;
+    zoomPercent.value = Number(zoomPercent.value.toFixed(1));
+    zoomTo(zoomPercent.value);
+}
+// 放大画布
+const plusFlow = () => {
+    if(maxZoomReached.value){
+        return;
+    }
+    zoomPercent.value += 0.1;
+    zoomPercent.value = Number(zoomPercent.value.toFixed(1));
+    zoomTo(zoomPercent.value);
+}
+// 自适应
+const selfAdaption = () => {
+    console.log('selfAdaption');
+    fitView({
+        minZoom:0.1,
+        maxZoom:2
+    });
+}
+// 打开/关闭所有节点
+const openAllNode = ref(false);
+const openOrCloseAllNode = () => {
+  eventBus.emit('openCard',openAllNode.value);
+  openAllNode.value =!openAllNode.value;
+}
+
+// 切换线类型
+const isBrokenLine = ref(false);
+const changeLineType = () => {
+    isBrokenLine.value =!isBrokenLine.value;
+}
+// 百分比
+const zoomPercent = ref(1);
+
+const disabledBackStep = computed(()=>{
+    return true;
+})
+const disabledForwardStep = computed(()=>{
+    return true;
+})
+watch(
+    ()=>viewport.value.zoom,
+    (newValue:any)=>{
+        zoomPercent.value = Number(newValue.toFixed(1));
+    }
+)
+
+
 onMounted(() => {
   addStartNode();
   addEndNode();
+  zoomTo(zoomPercent.value);
 });
 watch(
   () => localNodes.value,
@@ -255,11 +347,31 @@ watch(
   },
   { immediate: true, deep: true }
 );
+watch(
+  ()=>flowData.value,
+  (newValue:any)=>{
+    flowDataDebounce(newValue);
+  },
+  { immediate: true, deep: true }
+);
 </script>
 <template>
   <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd" :nodes="localNodes" :edges="localEdges">
     <!-- <MiniMap /> -->
-    <FlowControls />
+    <FlowControls 
+    @backStep="backStep"
+    @forwardStep="forwardStep"
+    @minusFlow="minusFlow"
+    @plusFlow="plusFlow"
+    @selfAdaption="selfAdaption"
+    @openOrCloseAllNode="openOrCloseAllNode"
+    @changeLineType="changeLineType"
+    :openAllNode="openAllNode"
+    :isBrokenLine="isBrokenLine"
+    :disabledBackStep="disabledBackStep"
+    :disabledForwardStep="disabledForwardStep"
+    :zoomPercent="zoomPercent"
+    />
     <Background :variant="BackgroundVariant.Dots" />
     <!-- <button type="button" :style="{ position: 'absolute', left: '10px', top: '10px', zIndex: 4 }" @click="addRandomNode">
       add node

@@ -8,94 +8,60 @@ import FoldAllNodeIcon from '../icons/FoldAllNodeIcon.vue';
 import OpenAllNodeIcon from '../icons/OpenAllNodeIcon.vue';
 import BrokenLineIcon from '../icons/BrokenLineIcon.vue';
 import SmoothLineIcon from '../icons/SmoothLineIcon.vue';
-import { Panel, PanelPosition, useVueFlow, } from '@vue-flow/core'
 
-const {
-  nodesDraggable,
-  nodesConnectable,
-  elementsSelectable,
-  setInteractive,
-  zoomTo,
-  zoomIn,
-  zoomOut,
-  fitView,
-  viewport,
-  minZoom,
-  maxZoom,
-} = useVueFlow()
-
-const isInteractive = toRef(() => nodesDraggable.value || nodesConnectable.value || elementsSelectable.value)
-
-const minZoomReached = toRef(() => viewport.value.zoom <= minZoom.value)
-
-const maxZoomReached = toRef(() => viewport.value.zoom >= maxZoom.value)
-
+const props = defineProps({
+    openAllNode:{
+        type:Boolean,
+        default:false
+    },
+    isBrokenLine:{
+        type:Boolean,
+        default:false
+    },
+    disabledBackStep:{
+        type:Boolean,
+        default:false
+    },
+    disabledForwardStep:{
+        type:Boolean,
+        default:false
+    },
+    zoomPercent:{
+        type:Number,
+        default:-1
+    }
+});
+const emit = defineEmits(['backStep','forwardStep','minusFlow','plusFlow','selfAdaption',
+'openOrCloseAllNode','changeLineType'
+]);
 // 后退
 const backStep = () => {
-    console.log('backStep');
+    emit('backStep');
 }
 // 前进
 const forwardStep = () => {
-    console.log('forwardStep');
+    emit('forwardStep');
 }
 // 缩小画布
 const minusFlow = () => {
-    if(minZoomReached.value){
-        return;
-    }
-    zoomPercent.value -= 0.1;
-    zoomPercent.value = Number(zoomPercent.value.toFixed(1));
-    zoomTo(zoomPercent.value);
+    emit('minusFlow');
 }
 // 放大画布
 const plusFlow = () => {
-    if(maxZoomReached.value){
-        return;
-    }
-    zoomPercent.value += 0.1;
-    zoomPercent.value = Number(zoomPercent.value.toFixed(1));
-    zoomTo(zoomPercent.value);
+    emit('plusFlow');
 }
 // 自适应
 const selfAdaption = () => {
-    console.log('selfAdaption');
-    fitView({
-        minZoom:0.1,
-        maxZoom:2
-    });
+    emit('selfAdaption');
 }
-// 打开/关闭所有节点
-const openAllNode = ref(false);
 const openOrCloseAllNode = () => {
-    openAllNode.value =!openAllNode.value;
+    emit('openOrCloseAllNode');
 }
 
 // 切换线类型
-const isBrokenLine = ref(false);
 const changeLineType = () => {
-    isBrokenLine.value =!isBrokenLine.value;
+    emit('changeLineType');
 }
-// 百分比
-const zoomPercent = ref(1);
-
-const disabledBackStep = computed(()=>{
-    return true;
-})
-const disabledForwardStep = computed(()=>{
-    return true;
-})
-watch(
-    ()=>viewport.value.zoom,
-    (newValue:any)=>{
-        zoomPercent.value = Number(newValue.toFixed(1));
-    }
-)
-
-
-onMounted(()=>{
-    zoomTo(zoomPercent.value);
-});
-
 
 </script>
 <template>
@@ -116,9 +82,9 @@ onMounted(()=>{
                 </div>
             </template>
             <el-button class="basic-flow-controls-icon" 
-            :class="[disabledBackStep?'basic-flow-controls-icon-disabled':'']"
+            :class="[props.disabledBackStep?'basic-flow-controls-icon-disabled':'']"
             :icon="BackOffIcon" @click="backStep" 
-            :disabled="disabledBackStep"
+            :disabled="props.disabledBackStep"
             />
         </el-tooltip>
         <el-tooltip
@@ -138,9 +104,9 @@ onMounted(()=>{
                 </div>
             </template>
             <el-button class="basic-flow-controls-icon" 
-            :class="[disabledForwardStep?'basic-flow-controls-icon-disabled':'']"
+            :class="[props.disabledForwardStep?'basic-flow-controls-icon-disabled':'']"
             :icon="ForwardIcon" @click="forwardStep" 
-            :disabled="disabledForwardStep"
+            :disabled="props.disabledForwardStep"
             />
         </el-tooltip>
         <el-tooltip
@@ -160,7 +126,7 @@ onMounted(()=>{
             </template>
             <el-button class="basic-flow-controls-icon" :icon="MinusIcon" @click="minusFlow" />
         </el-tooltip>
-        <div class="f-c-zoom-percent">{{Math.floor(zoomPercent*100)}}%</div>
+        <div class="f-c-zoom-percent">{{Math.floor(props.zoomPercent*100)}}%</div>
         <el-tooltip
             :offset="12"
             popper-class="tooltip-box-item-in-controls"
@@ -193,18 +159,18 @@ onMounted(()=>{
             popper-class="tooltip-box-item-in-controls"
             effect="dark"
             placement="top"
-            :content="openAllNode?'展开全部节点':'折叠全部节点'"
+            :content="props.openAllNode?'展开全部节点':'折叠全部节点'"
         >
-            <el-button class="basic-flow-controls-icon" :icon="!openAllNode?FoldAllNodeIcon:OpenAllNodeIcon" @click="openOrCloseAllNode" />
+            <el-button class="basic-flow-controls-icon" :icon="!props.openAllNode?FoldAllNodeIcon:OpenAllNodeIcon" @click="openOrCloseAllNode" />
         </el-tooltip>
         <el-tooltip
             :offset="12"
             popper-class="tooltip-box-item-in-controls"
             effect="dark"
             placement="top"
-            :content="isBrokenLine?'切换为平滑线':'切换为折线'"
+            :content="props.isBrokenLine?'切换为平滑线':'切换为折线'"
         >
-            <el-button class="basic-flow-controls-icon" :icon="isBrokenLine?BrokenLineIcon:SmoothLineIcon" @click="changeLineType" />
+            <el-button class="basic-flow-controls-icon" :icon="props.isBrokenLine?BrokenLineIcon:SmoothLineIcon" @click="changeLineType" />
         </el-tooltip>
     </div>
 </template>

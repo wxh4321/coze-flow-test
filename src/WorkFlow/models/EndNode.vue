@@ -5,13 +5,17 @@ import ParamsItem from '../basic/ParamsItem.vue'
 import { toopTipText2,toopTipText3,toopTipText4 } from '../data/tooltips'
 import { endNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
+import { EventBus } from '../../utils/EventBus'
 
+const eventBus = EventBus();
 const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const collapseArr = ['output','result'];
 const paramsData = ref(endNodeParams);
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const endNode = ref({
+    openCard:openCard.value,
     outputParams:paramsData.value,
     answer:{
         value:'1',
@@ -37,7 +41,10 @@ const endNode = ref({
         streamOutputValue:false,
     }
 });
-
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
+});
 const titles = ref([
     {name:'参数名',flexNum:'1'},
     {name:'参数值',flexNum:'1'},
@@ -151,7 +158,7 @@ onMounted(()=>{
                 <span>工作流的最终节点，用于返回工作流运行后的结果信息</span>
             </div>
         </div>
-        <div class="end-node-answer">
+        <div class="end-node-answer" v-if="openCard">
             <span class="e-n-a-title">选择回答模式</span>
             <div class="e-n-a-select">
                 <el-select v-model="endNode.answer.value" :placeholder="endNode.answer.placeholder" :disabled="endNode.answer.disabled"

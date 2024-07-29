@@ -18,8 +18,9 @@ const collapseArr = ['input','knowledge','output'];
 const paramsData:any = ref(knowledgeNodeParams);
 const modeRef:any = ref(null);
 
-
+// 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const knowledgeNode = ref({
+    openCard:openCard.value,
     input:{
         inputParams:paramsData.value,
     },
@@ -48,7 +49,10 @@ const knowledgeNode = ref({
     },
     
 });
-
+// 是否打开关闭整个节点
+eventBus.on('openCard', (value: any) => {
+    openCard.value = value;
+});
 const inputTitles = ref([
     {name:'参数名',flexNum:'3'},
     {name:'参数值',flexNum:'2'},

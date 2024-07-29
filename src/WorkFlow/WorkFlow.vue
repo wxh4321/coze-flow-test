@@ -16,7 +16,9 @@ import MenuIcon from './icons/MenuIcon.vue';
 import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCLoseIcon.vue';
 
 import { modelItemDataProp } from './data/data';
+import { debounce } from '../utils'
 
+const workFlowData:any = ref({});
 const leftClose = ref(false);
 
 const runType = ref('');
@@ -57,6 +59,20 @@ const copyResult = () => {
 const addModel = (item:modelItemDataProp) => {
    console.log('addModel',item);
 }
+const setData = (flowData:any) => {
+    workFlowData.value.flowData = flowData;
+}
+const workFlowDataDebounce = debounce((data: any) => {
+  console.log('workFlowDataDebounce ', data);
+}, 100);
+
+watch(
+    ()=>workFlowData.value,
+    (newVal)=>{
+        workFlowDataDebounce(newVal);
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
     <Header 
@@ -88,7 +104,7 @@ const addModel = (item:modelItemDataProp) => {
             </div>
         </div>
         <div class="workflow-right">
-            <VueFlow/>
+            <VueFlow @setData="setData"/>
         </div>
         <div class="workflow-run-result" :class="[runType!=='run'?'workflow-container-right-close':'']">
             <RunResult 
