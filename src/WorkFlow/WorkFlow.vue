@@ -16,8 +16,10 @@ import MenuIcon from './icons/MenuIcon.vue';
 import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCLoseIcon.vue';
 
 import { modelItemDataProp } from './data/data';
-import { debounce } from '../utils'
+import { debounce, deepClone } from '../utils'
+import { useGlobalStore } from '../store';
 
+const globalStore = useGlobalStore();
 const workFlowData:any = ref({});
 const leftClose = ref(false);
 
@@ -41,7 +43,7 @@ const closeResult = () => {
     runType.value = '';
 }
 const clickResult = (res:Boolean)=>{
-    console.log('aaaa, res', res);
+    console.log('clickResult ', res);
 }
 const tryRun = () => {
     console.log('tryRun');
@@ -63,7 +65,8 @@ const setData = (flowData:any) => {
     workFlowData.value.flowData = flowData;
 }
 const workFlowDataDebounce = debounce((data: any) => {
-  console.log('workFlowDataDebounce ', data);
+    console.log('workFlowDataDebounce ', data);
+    globalStore.setWorkFlowState(deepClone(data));
 }, 100);
 
 watch(
@@ -73,6 +76,7 @@ watch(
     },
     { immediate: true, deep: true }
 );
+
 </script>
 <template>
     <Header 

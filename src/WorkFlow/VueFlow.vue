@@ -6,7 +6,13 @@ import { VueFlow, useVueFlow, Position, MarkerType } from '@vue-flow/core';
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import FlowControls from './controls/FlowControls.vue';
 
-import { debounce } from '../utils'
+import { debounce,deepClone } from '../utils'
+import { useHistoryStore } from '../store/history';
+import { useGlobalStore } from '../store';
+
+const historyStore = useHistoryStore();
+const globalStore = useGlobalStore();
+
 const {
   nodesDraggable,
   nodesConnectable,
@@ -23,6 +29,7 @@ const {
   getNodes, getEdges, findNode, findEdge,
   addNodes, updateNode,
   addEdges, updateEdge,
+  setNodes,setEdges,
   removeNodes, removeEdges,
   onEdgeUpdateStart,
   onEdgeUpdateEnd,
@@ -40,8 +47,6 @@ import ConditionNode from './models/ConditionNode.vue'
 
 import { EventBus } from '../utils/EventBus';
 
-const isInteractive = toRef(() => nodesDraggable.value || nodesConnectable.value || elementsSelectable.value)
-
 const minZoomReached = toRef(() => viewport.value.zoom <= minZoom.value)
 
 const maxZoomReached = toRef(() => viewport.value.zoom >= maxZoom.value)
@@ -49,12 +54,14 @@ const maxZoomReached = toRef(() => viewport.value.zoom >= maxZoom.value)
 const VueFlowData = {
   id: 1
 };
-const localNodes: any = ref(nodes);
-const localEdges: any = ref(edges);
-const flowData:any = ref({});
+const updateType = ref('');
+const localNodes: any = reactive((globalStore.workFlowData as any)?.flowData?.nodes||nodes);
+const localEdges: any = ref((globalStore.workFlowData as any)?.flowData?.edges || edges);
+// const flowData:any = ref({});
 const eventBus = EventBus();
 const dialogVisible = ref(false);
-const updatedEdge: any = ref(null);
+const isBrokenLine = ref(false);
+
 /**
  * 注意：
  * 这里的nodeid 10000-20000 是为了区分不同的节点类型
@@ -117,20 +124,7 @@ onEdgeMouseEnter((params: any) => {
     style: { stroke: '#37d0ff' }
   });
 });
-onConnect((params: any) => {
-  console.log('connnect ', params);
-  params = {
-    ...params,
-    updatable: true,
-    type: '',
-    // type: 'step', // 折线
-    markerEnd: {
-      type: MarkerType.Arrow,
-      color: '#4d53e8'
-    }
-  };
-  addEdges([params]);
-})
+
 
 onEdgeUpdateStart((params: any) => {
   console.log('onEdgeUpdateStart ', params.edge)
@@ -147,7 +141,7 @@ onEdgeUpdate((params: any) => {
 });
 onPaneReady((flowInstance) => console.log('flow loaded:', flowInstance))
 
-onNodeDragStop((node) => console.log('drag stop', node))
+
 let vueFlowNodeId = VueFlowData.id;
 const addStartNode = () => {
   const nodeId = '10000';
@@ -206,17 +200,60 @@ const addNodeDebounce = debounce(() => {
 }, 500)
 
 const localNodesDebounce = debounce((nodes: any) => {
-  // console.log('localNodes ', nodes);
-  flowData.value.nodes = nodes;
+  console.log('localNodesDebounce ', nodes);
+  // flowData.value.nodes = nodes;
+  globalStore.setWorkFlowState({
+    flowData:{
+      ...(globalStore?.workFlowData?.flowData) || {},
+      nodes
+    }
+  });
 }, 100);
 
 const localEdgesDebounce = debounce((edges: any) => {
-  // console.log('localEdges ', edges);
-  flowData.value.edges = edges;
+  console.log('localEdgesDebounce ', edges);
+  // flowData.value.edges = edges;
+  globalStore.setWorkFlowState({
+    ...(globalStore.workFlowData) || {},
+    flowData:{
+      ...(globalStore.workFlowData?.flowData) || {},
+      edges
+    }
+  });
 }, 100);
 
+onConnect((params: any) => {
+  console.log('connnect ', params);
+  params = {
+    ...params,
+    updatable: true,
+    type: isBrokenLine.value ? 'step' : '', // type: 'step', // 折线
+    markerEnd: {
+      type: MarkerType.Arrow,
+      color: '#4d53e8'
+    }
+  };
+  addEdges([params]);
+  // 收集数据
+  localEdgesDebounce(edges.value);
+})
+onNodeDragStop((node) => {
+  console.log('drag stop', node);
+  // 收集数据
+  localNodesDebounce(nodes.value);
+});
+// 去掉无用节点,过滤数据
+const filterFlowData = (data:any) => {
+  data?.nodes?.forEach((node:any)=>{
+    if(node.label){
+      node.label = '';
+    }
+  });
+}
 const flowDataDebounce = debounce((data:any)=>{
-  emit('setData',data);
+  const filterData = deepClone(data);
+  filterFlowData(filterData);
+  emit('setData',filterData);
 },100);
 
 const vueFlowDragLeave = (event: any) => {
@@ -225,6 +262,26 @@ const vueFlowDragLeave = (event: any) => {
 const vueFlowDragover = (event: any) => {
   // console.log('vueFlowDragover', event);
 }
+eventBus.on('updateNodeData', (type: string) => {
+  updateType.value = type;
+  if(type!=='history'){
+    return;
+  }
+  const localNodesTmp = deepClone(localNodes.value);
+  const data = (globalStore.workFlowData as any)?.flowData;
+  data?.nodes?.forEach((item:any,i:number)=>{
+    const nodeData = localNodesTmp.find((node:any)=>node.id===item.id);
+    localNodesTmp[i] = {
+      ...nodeData,
+      ...item,
+      label:nodeData.label
+    };
+    updateNode(item.id, localNodesTmp[i]);
+  });
+  data?.edges?.forEach((item:any)=>{
+    changeEdgeParams(item,item);
+  });
+});
 // 监听全局消息
 eventBus.on('dragAddNode', (data: any) => {
   dragNodeData.value = data;
@@ -261,6 +318,15 @@ eventBus.on('disabledDraggable', (data: any) => {
 eventBus.on('openKnowledgeDialog', (data: any) => {
   dialogVisible.value = true;
 });
+// 保存model节点数据
+eventBus.on('saveModelData', (payload: any) => {
+  const { id, data } = payload || {};
+  globalStore.workFlowData?.flowData?.nodes?.forEach((node: any) => {
+    if (node.id === id) {
+      node.data.metaData = data;
+    }
+  });
+});
 const onMoveEnd = (e: FlowEvents['moveEnd']) => {
   console.log('zoom/move end', e.flowTransform)
 }
@@ -268,10 +334,13 @@ const onMoveEnd = (e: FlowEvents['moveEnd']) => {
 // 后退
 const backStep = () => {
     console.log('backStep');
+    historyStore.undo();
+    // 发消息更新数据
 }
 // 前进
 const forwardStep = () => {
     console.log('forwardStep');
+    historyStore.redo();
 }
 // 缩小画布
 const minusFlow = () => {
@@ -307,18 +376,20 @@ const openOrCloseAllNode = () => {
 }
 
 // 切换线类型
-const isBrokenLine = ref(false);
 const changeLineType = () => {
     isBrokenLine.value =!isBrokenLine.value;
+    localEdges.value.forEach((edge:any)=>{
+      edge.type = isBrokenLine.value ? 'step' : ''; // type: 'step', // 折线
+    });
 }
 // 百分比
 const zoomPercent = ref(1);
 
 const disabledBackStep = computed(()=>{
-    return true;
+  return historyStore.pointer <= 0;
 })
 const disabledForwardStep = computed(()=>{
-    return true;
+    return historyStore.pointer > historyStore.queue.length-1;
 })
 watch(
     ()=>viewport.value.zoom,
@@ -333,30 +404,38 @@ onMounted(() => {
   addEndNode();
   zoomTo(zoomPercent.value);
 });
-watch(
-  () => localNodes.value,
-  (newValue: any) => {
-    localNodesDebounce(newValue);
-  },
-  { immediate: true, deep: true }
-);
-watch(
-  () => localEdges.value,
-  (newValue: any) => {
-    localEdgesDebounce(newValue);
-  },
-  { immediate: true, deep: true }
-);
-watch(
-  ()=>flowData.value,
-  (newValue:any)=>{
-    flowDataDebounce(newValue);
-  },
-  { immediate: true, deep: true }
-);
+// watch(
+//   () => localNodes.value,
+//   (newValue: any) => {
+//     localNodesDebounce(newValue);
+//   },
+//   { immediate: true, deep: true }
+// );
+// watch(
+//   () => localEdges.value,
+//   (newValue: any) => {
+//     // localEdgesDebounce(newValue);
+//     console.log('watch localEdges ', newValue)
+
+//   },
+//   { immediate: true, deep: true }
+// );
+
+// watch(
+//   ()=>flowData.value,
+//   (newValue:any)=>{
+//     if(updateType.value!=='history'){
+//       flowDataDebounce(newValue);
+//     }
+//     else{
+//       console.log('flowDataDebounce 12132434');
+//     }
+//   },
+//   { immediate: true, deep: true }
+// );
 </script>
 <template>
-  <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd" :nodes="localNodes" :edges="localEdges">
+  <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd">
     <!-- <MiniMap /> -->
     <FlowControls 
     @backStep="backStep"

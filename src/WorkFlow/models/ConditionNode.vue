@@ -15,8 +15,10 @@ import { condDescParam, selectParam, textareaParam,checkBoxParam,deleteIconParam
 import { EventBus } from '../../utils/EventBus'
 import { publicTools } from '../data';
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
+import { saveModelData } from '../../utils/workflow-tools'
 
 const eventBus = EventBus();
+const nodeId = ref('');
 const openCard = ref(true);
 const listDraggable = ref(false);
 const titleRef:any = ref(null);
@@ -311,7 +313,19 @@ onMounted(()=>{
     setItem(0,0,4,{
         disabled:true
     });
+    // 获取当前节点
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    nodeId.value = id;
+    saveModelData(nodeId.value,conditionNode.value);
 });
+watch(
+    ()=>conditionNode.value,
+    (newValue:any)=>{
+        saveModelData(nodeId.value,newValue);
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
     <div class="cond-model-node-wrapper" ref="modeRef">

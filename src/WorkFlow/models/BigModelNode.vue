@@ -13,22 +13,24 @@ import { toopTipText1,toopTipText5,toopTipText6,toopTipText7,toopTipText8 } from
 import { bigModelInputNodeParams,bigModelOutputNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
+import { saveModelData } from '../../utils/workflow-tools'
+import { useGlobalStore } from '../../store';
+import { deepClone } from '../../utils'
 
 const eventBus = EventBus();
+const nodeId = ref('');
 const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const titleRef:any = ref(null);
 const collapseArr = ['input','notice','output'];
-const paramsData = ref(bigModelInputNodeParams);
-const paramsData1 = ref(bigModelOutputNodeParams);
 
 const modeRef:any = ref(null);
 // 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const bigModelNode = ref({
     openCard:openCard.value,
     input:{
-        inputParams:paramsData.value,
+        inputParams:deepClone(bigModelInputNodeParams),
         checkbox:{
             // type:'checkbox',
             value:'',
@@ -57,7 +59,7 @@ const bigModelNode = ref({
         }
     },
     output:{
-        outputParams:paramsData1.value,
+        outputParams:deepClone(bigModelOutputNodeParams),
         export:{
             tabText:'Json',
             tabindex:2
@@ -88,6 +90,23 @@ const bigModelNode = ref({
 // 是否打开关闭整个节点
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
+});
+const updateType = ref('');
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            bigModelNode.value = data.data.metaData || {};
+        }
+    },100);
 });
 const inputTitles = ref([
     {name:'参数名',flexNum:'4'},
@@ -182,8 +201,9 @@ const addItemInput = () => {
             }
         },
     ];
-    const id = paramsData.value.length===0?1:((paramsData.value[paramsData.value.length - 1] as any)?.id+1);
-    (paramsData.value as any).push({
+    const list = bigModelNode.value.input.inputParams;
+    const id = list.length===0?1:((list[list.length - 1] as any)?.id+1);
+    bigModelNode.value.input.inputParams.push({
         id,
         list: newItemArr
     });
@@ -211,8 +231,9 @@ const addItemOutput = () => {
             }
         },
     ];
-    const id = paramsData1.value.length===0?1:((paramsData1.value[paramsData1.value.length - 1] as any)?.id+1);
-    (paramsData1.value as any).push({
+    const list = bigModelNode.value.output.outputParams;
+    const id = list.length===0?1:((list[list.length - 1] as any)?.id+1);
+    bigModelNode.value.output.outputParams.push({
         id,
         list: newItemArr
     });
@@ -243,15 +264,33 @@ const tabClick = (index:number,text:string) => {
     bigModelNode.value.output.export.tabindex = index;
     bigModelNode.value.output.export.tabText = text;
     if(index!==2){
-        paramsData1.value[0].list[1].disabled = true;
+        bigModelNode.value.output.outputParams[0].list[1].disabled = true;
     }
     else{
-        paramsData1.value[0].list[1].disabled = false;
+        bigModelNode.value.output.outputParams[0].list[1].disabled = false;
     }
 }
 onMounted(()=>{
     openAll();
+    // 获取当前节点
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    nodeId.value = id;
+    saveModelData(nodeId.value,bigModelNode.value);
 });
+watch(
+    ()=>bigModelNode.value,
+    (newValue:any)=>{
+        if(updateType.value!=='history'){
+            saveModelData(nodeId.value,newValue);
+        }
+        else{
+            console.log('data111 ..... ', updateType.value);
+
+        }
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
     <div class="big-model-node-wrapper" ref="modeRef">
@@ -316,7 +355,7 @@ onMounted(()=>{
                             <ModelTreeText :data="bigModelNode.input.treeData"/>
                         </div>
                         <div>
-                            <ParamsItem :data="paramsData"
+                            <ParamsItem :data="bigModelNode.input.inputParams"
                             key="bmInput"
                             @addItem="addItemInput"
                             :titles="inputTitles"
@@ -439,7 +478,7 @@ onMounted(()=>{
                             </div>
                         </template>
                         <div>
-                            <ParamsItem :data="paramsData1"
+                            <ParamsItem :data="bigModelNode.output.outputParams"
                             key="bmouput"
                             :showAddIcon="bigModelNode.output.export.tabindex===2"
                             @addItem="addItemOutput"

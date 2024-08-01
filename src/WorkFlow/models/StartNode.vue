@@ -7,13 +7,15 @@ import { toopTipText, toopTipText1 } from '../data/tooltips'
 import { startNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
+import { saveModelData } from '../../utils/workflow-tools'
 
 const eventBus = EventBus();
-
+const nodeId = ref('');
 const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
 const paramsData = ref(startNodeParams);
+const modeRef: any = ref(null);
 
 // 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const startNode = ref({
@@ -98,10 +100,22 @@ const addItem = () => {
 }
 onMounted(()=>{
     openAll();
+    // 获取当前节点
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    nodeId.value = id;
+    saveModelData(nodeId.value,startNode.value);
 });
+watch(
+    ()=>startNode.value,
+    (newValue:any)=>{
+        saveModelData(nodeId.value,newValue);
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
-    <div class="start-node-wrapper">
+    <div class="start-node-wrapper" ref="modeRef">
         <div :class="[openCard?'start-node-header':'']">
             <div class="start-node-title">
                 <el-button class="s-n-t-icon" 

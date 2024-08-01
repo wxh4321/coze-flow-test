@@ -8,6 +8,9 @@ import FoldAllNodeIcon from '../icons/FoldAllNodeIcon.vue';
 import OpenAllNodeIcon from '../icons/OpenAllNodeIcon.vue';
 import BrokenLineIcon from '../icons/BrokenLineIcon.vue';
 import SmoothLineIcon from '../icons/SmoothLineIcon.vue';
+import { EventBus } from '../../utils/EventBus';
+
+const eventBus = EventBus();
 
 const props = defineProps({
     openAllNode:{
@@ -36,11 +39,17 @@ const emit = defineEmits(['backStep','forwardStep','minusFlow','plusFlow','selfA
 ]);
 // 后退
 const backStep = () => {
-    emit('backStep');
+    eventBus.emit('updateNodeData','history');
+    setTimeout(()=>{
+        emit('backStep');
+    },100);
 }
 // 前进
 const forwardStep = () => {
-    emit('forwardStep');
+    eventBus.emit('updateNodeData','history');
+    setTimeout(()=>{
+        emit('forwardStep');
+    },100);
 }
 // 缩小画布
 const minusFlow = () => {
@@ -62,10 +71,14 @@ const openOrCloseAllNode = () => {
 const changeLineType = () => {
     emit('changeLineType');
 }
-
+const mouseLeave = () => {
+    eventBus.emit('updateNodeData','nothistory');
+}
 </script>
 <template>
-    <div class="flow-controls-wrapper">
+    <div class="flow-controls-wrapper" 
+    @mouseleave="mouseLeave"
+    >
         <el-tooltip
             :offset="12"
             popper-class="tooltip-box-item-in-controls"

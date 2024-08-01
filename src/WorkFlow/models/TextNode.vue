@@ -15,8 +15,10 @@ import { toopTipText12, toopTipText13, toopTipText14, toopTipText15 } from '../d
 import { textNodeParams } from '../data/node-params'
 import { inputTextParam, selectParam, textareaParam, checkBoxParam, deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
+import { saveModelData } from '../../utils/workflow-tools'
 
 const eventBus = EventBus();
+const nodeId = ref('');
 const openCard = ref(true);
 const openCollapse: any = ref({});
 const openCollapseArr: any = ref([]);
@@ -360,11 +362,23 @@ onMounted(() => {
     openAll();
     // 监听是否在指定元素之外点击(知识点，其实应该用el-popover实现)
     document.addEventListener('click', closeOrOpenSettingStringArea);
+    // 获取当前节点
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    nodeId.value = id;
+    saveModelData(nodeId.value,textNode.value);
 
 });
 onUnmounted(() => {
     document.removeEventListener('click', closeOrOpenSettingStringArea);
 });
+watch(
+    ()=>textNode.value,
+    (newValue:any)=>{
+        saveModelData(nodeId.value,newValue);
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
     <div class="text-node-wrapper" ref="modeRef">

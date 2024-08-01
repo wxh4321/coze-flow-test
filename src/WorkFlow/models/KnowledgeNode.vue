@@ -8,8 +8,10 @@ import ModelTreeText from '../basic/ModelTreeText.vue'
 import { toopTipText9,toopTipText10,toopTipText11 } from '../data/tooltips'
 import { knowledgeNodeParams } from '../data/node-params'
 import { EventBus } from '../../utils/EventBus'
+import { saveModelData } from '../../utils/workflow-tools'
 
 const eventBus = EventBus();
+const nodeId = ref('');
 const openCard = ref(true);
 const openCollapse:any = ref({});
 const openCollapseArr:any = ref([]);
@@ -156,7 +158,19 @@ const selectChange = (options:any) => {
 }
 onMounted(()=>{
     openAll();
+    // 获取当前节点
+    const parent = modeRef.value.parentNode;
+    const id = parent.getAttribute('data-id');
+    nodeId.value = id;
+    saveModelData(nodeId.value,knowledgeNode.value);
 });
+watch(
+    ()=>knowledgeNode.value,
+    (newValue:any)=>{
+        saveModelData(nodeId.value,newValue);
+    },
+    { immediate: true, deep: true }
+);
 </script>
 <template>
     <div class="know-model-node-wrapper" ref="modeRef">
