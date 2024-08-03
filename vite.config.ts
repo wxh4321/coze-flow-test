@@ -11,6 +11,9 @@ export default defineConfig({
   base: '/coze-flow-test/',
   resolve: {
     dedupe: ['vue'],
+    alias: {
+      '@': resolve('src'),
+    },
   },
   plugins: [
     vue(),

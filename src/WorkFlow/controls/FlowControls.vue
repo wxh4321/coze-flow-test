@@ -39,17 +39,11 @@ const emit = defineEmits(['backStep','forwardStep','minusFlow','plusFlow','selfA
 ]);
 // 后退
 const backStep = () => {
-    eventBus.emit('updateNodeData','history');
-    setTimeout(()=>{
-        emit('backStep');
-    },100);
+    emit('backStep');
 }
 // 前进
 const forwardStep = () => {
-    eventBus.emit('updateNodeData','history');
-    setTimeout(()=>{
-        emit('forwardStep');
-    },100);
+    emit('forwardStep');
 }
 // 缩小画布
 const minusFlow = () => {

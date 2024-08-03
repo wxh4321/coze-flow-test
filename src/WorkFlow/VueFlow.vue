@@ -267,20 +267,38 @@ eventBus.on('updateNodeData', (type: string) => {
   if(type!=='history'){
     return;
   }
-  const localNodesTmp = deepClone(localNodes.value);
+  const localNodesTmp:any = [];
   const data = (globalStore.workFlowData as any)?.flowData;
   data?.nodes?.forEach((item:any,i:number)=>{
-    const nodeData = localNodesTmp.find((node:any)=>node.id===item.id);
-    localNodesTmp[i] = {
-      ...nodeData,
-      ...item,
-      label:nodeData.label
+    const node: any = {
+      ...(findNode(item.id)),
     };
-    updateNode(item.id, localNodesTmp[i]);
+    Object.keys(item).forEach(key=>{
+      if(key!=='label'){
+        node[key] = item[key];
+      }
+    });
+    // removeNodes([node]);
+    updateNode(node.id, node);
+    localNodesTmp.push(node);
   });
+  // if(localNodesTmp.length){
+  //   addNodes(localNodesTmp);
+  // }
   data?.edges?.forEach((item:any)=>{
-    changeEdgeParams(item,item);
+    const edge:any = findEdge(item.id)||{};
+    if(Object.keys(edge).length){
+      removeEdges([edge]);
+    }
   });
+  if(data?.edges?.length){
+    addEdges(data.edges);
+  }
+
+  // setTimeout(()=>{
+  //   localNodes.value = localNodesTmp;
+  //   localEdges.value = data?.edges|| [];
+  // },0);
 });
 // 监听全局消息
 eventBus.on('dragAddNode', (data: any) => {
@@ -336,11 +354,17 @@ const backStep = () => {
     console.log('backStep');
     historyStore.undo();
     // 发消息更新数据
+    setTimeout(()=>{
+        eventBus.emit('updateNodeData','history');
+    },100);
 }
 // 前进
 const forwardStep = () => {
     console.log('forwardStep');
     historyStore.redo();
+    setTimeout(()=>{
+        eventBus.emit('updateNodeData','history');
+    },100);
 }
 // 缩小画布
 const minusFlow = () => {

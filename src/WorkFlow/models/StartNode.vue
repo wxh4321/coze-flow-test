@@ -6,8 +6,7 @@ import ParamsItem from '../basic/ParamsItem.vue'
 import { toopTipText, toopTipText1 } from '../data/tooltips'
 import { startNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
-import { EventBus } from '../../utils/EventBus'
-import { saveModelData } from '../../utils/workflow-tools'
+import { EventBus } from '@/utils/EventBus.ts'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -104,12 +103,12 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,startNode.value);
+    eventBus.emit('saveModelData', {id:nodeId.value,data:startNode.value});
 });
 watch(
     ()=>startNode.value,
     (newValue:any)=>{
-        saveModelData(nodeId.value,newValue);
+        eventBus.emit('saveModelData', {id:nodeId.value,data:newValue});
     },
     { immediate: true, deep: true }
 );
