@@ -34,7 +34,7 @@ const {
   onEdgeUpdateStart,
   onEdgeUpdateEnd,
   onEdgeUpdate,
-  onConnect, onPaneReady, onNodeDragStop, dimensions,
+  onConnect, onPaneReady, onNodeDragStop,onNodeDragStart, dimensions,
   onEdgeClick, onEdgeMouseLeave, onEdgeMouseEnter,
 } = useVueFlow()
 import StartNode from './models/StartNode.vue'
@@ -55,8 +55,8 @@ const VueFlowData = {
   id: 1
 };
 const updateType = ref('');
-const localNodes: any = reactive((globalStore.workFlowData as any)?.flowData?.nodes||nodes);
-const localEdges: any = ref((globalStore.workFlowData as any)?.flowData?.edges || edges);
+const localNodes: any = ref([]);
+const localEdges: any = ref([]);
 // const flowData:any = ref({});
 const eventBus = EventBus();
 const dialogVisible = ref(false);
@@ -152,7 +152,7 @@ const addStartNode = () => {
     label: markRaw(nodesTypeObj[nodeId]),
     position: { x: 100, y: dimensions.value.height / 4 },
     // position: { x: Math.random() * dimensions.value.width, y: Math.random() * dimensions.value.height },
-  })
+  });
 }
 const addEndNode = () => {
   const nodeId = '20000';
@@ -199,30 +199,34 @@ const addNodeDebounce = debounce(() => {
   addRandomNode(dragNodeData.value.id, dragNodeData.value.position);
 }, 500)
 
-const localNodesDebounce = debounce((nodes: any) => {
+const localNodesDebounce = debounce(() => {
   console.log('localNodesDebounce ', nodes);
   // flowData.value.nodes = nodes;
   globalStore.setWorkFlowState({
     flowData:{
       ...(globalStore?.workFlowData?.flowData) || {},
-      nodes
+      edges:edges.value,
+      nodes:nodes.value
     }
   });
 }, 100);
 
-const localEdgesDebounce = debounce((edges: any) => {
+const localEdgesDebounce = debounce(() => {
   console.log('localEdgesDebounce ', edges);
   // flowData.value.edges = edges;
   globalStore.setWorkFlowState({
     ...(globalStore.workFlowData) || {},
     flowData:{
       ...(globalStore.workFlowData?.flowData) || {},
-      edges
+      edges:edges.value,
+      nodes:nodes.value
     }
   });
 }, 100);
 
 onConnect((params: any) => {
+  // 收集数据
+  localEdgesDebounce();
   console.log('connnect ', params);
   params = {
     ...params,
@@ -234,13 +238,14 @@ onConnect((params: any) => {
     }
   };
   addEdges([params]);
-  // 收集数据
-  localEdgesDebounce(edges.value);
 })
-onNodeDragStop((node) => {
-  console.log('drag stop', node);
+onNodeDragStart(()=>{
+  console.log('onNodeDragStart');
   // 收集数据
   localNodesDebounce(nodes.value);
+});
+onNodeDragStop((node) => {
+  console.log('drag stop', node);
 });
 // 去掉无用节点,过滤数据
 const filterFlowData = (data:any) => {
@@ -278,27 +283,29 @@ eventBus.on('updateNodeData', (type: string) => {
         node[key] = item[key];
       }
     });
-    // removeNodes([node]);
-    updateNode(node.id, node);
+    // // removeNodes([node]);
+    // updateNode(node.id, node);
     localNodesTmp.push(node);
   });
   // if(localNodesTmp.length){
   //   addNodes(localNodesTmp);
   // }
-  data?.edges?.forEach((item:any)=>{
-    const edge:any = findEdge(item.id)||{};
-    if(Object.keys(edge).length){
-      removeEdges([edge]);
-    }
-  });
-  if(data?.edges?.length){
-    addEdges(data.edges);
-  }
+  // data?.edges?.forEach((item:any)=>{
+  //   const edge:any = findEdge(item.id)||{};
+  //   if(Object.keys(edge).length){
+  //     removeEdges([edge]);
+  //   }
+  // });
+  // if(data?.edges?.length){
+  //   addEdges(data.edges);
+  // }
 
   // setTimeout(()=>{
-  //   localNodes.value = localNodesTmp;
-  //   localEdges.value = data?.edges|| [];
+    localNodes.value = localNodesTmp;
+    localEdges.value = data?.edges|| [];
   // },0);
+  console.log('localNodes ', localNodes.value)
+  console.log('localEdges ', localEdges.value)
 });
 // 监听全局消息
 eventBus.on('dragAddNode', (data: any) => {
@@ -459,7 +466,9 @@ onMounted(() => {
 // );
 </script>
 <template>
-  <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd">
+  <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd"
+  v-model:nodes="localNodes" v-model:edges="localEdges"
+  >
     <!-- <MiniMap /> -->
     <FlowControls 
     @backStep="backStep"

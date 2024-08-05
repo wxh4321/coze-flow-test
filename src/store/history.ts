@@ -3,46 +3,50 @@ import { defineStore } from 'pinia'
 import { useGlobalStore } from '.';
 const globalStore = useGlobalStore();
 
-export const useHistoryStore = defineStore('history', {
-  state:()=>({
-    queue: [], // 快照栈堆
-    pointer: 0, // 栈堆下标 
-    LIMIT: 50 // 栈堆的限制
-  }),
-  actions:{
-    record(data:any){
-      while (this.pointer < this.queue.length - 1) {
-        this.queue.pop();
+export const useHistoryStore = defineStore('history', () => {
+  const queue:any = ref([]); // 快照栈堆
+  const pointer = ref(0); // 栈堆下标 
+  const LIMIT = 50;  // 栈堆的限制
+  const record = (data:any) => {
+      while (pointer.value < queue.value.length - 1) {
+        queue.value.pop();
       }
-      this.pointer++
-      this.queue.push(deepClone(data))
-      if (this.queue.length - 1 > this.LIMIT) {
-        this.queue.shift()
+      pointer.value++
+      queue.value.push(deepClone(data))
+      if (queue.value.length - 1 > LIMIT) {
+        queue.value.shift()
       }
-      console.log('record ', this.pointer, this.queue.length, this.queue);
+      console.log('record ', pointer.value, queue.value.length, queue.value);
 
-    },
+    }
     // 撤销
-    undo(){
-      --this.pointer
-      const data = deepClone(this.queue[this.pointer]);
+    const undo = () => {
+      --pointer.value
+      const data = deepClone(queue.value[pointer.value]);
       if(!data){
         return;
       }
-      console.log('undo ', this.pointer, this.queue.length, this.queue);
-      globalStore.setFlowData(data);
-      return data;
-    },
-    // 重做
-    redo(){
-      ++this.pointer
-      const data = deepClone(this.queue[this.pointer]);
-      if(!data){
-        return;
-      }
-      console.log('redo ', this.pointer, this.queue.length, this.queue);
+      console.log('undo ', pointer.value, queue.value.length, queue.value);
       globalStore.setFlowData(data);
       return data;
     }
-  }
+    // 重做
+    const redo = () => {
+      ++pointer.value
+      const data = deepClone(queue.value[pointer.value]);
+      if(!data){
+        return;
+      }
+      console.log('redo ', pointer.value, queue.value.length, queue.value);
+      globalStore.setFlowData(data);
+      return data;
+    }
+    return {
+      queue,
+      pointer,
+      record,
+      redo,
+      undo
+    }
+
 })
