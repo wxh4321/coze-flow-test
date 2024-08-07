@@ -71,26 +71,7 @@
     }
   }
 }
-// 全局加载loading
-.custon-loading {
-  background: url(@/assets/images/loading-old.gif) no-repeat;
-  background-size: cover;
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
-// .custom-loading {
-.el-loading-spinner {
-  .circular {
-    display: none !important;
-  }
-  background: url(@/assets/images/loading-old.gif) no-repeat center;
-  background-size: 140px 35px;
-  height: 35px;
-  width: 140px !important;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+
 // }
 // .el-button {
 //   .is-loading {
