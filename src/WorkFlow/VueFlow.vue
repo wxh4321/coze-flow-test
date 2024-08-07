@@ -404,9 +404,13 @@ const openOrCloseAllNode = () => {
 // 切换线类型
 const changeLineType = () => {
     isBrokenLine.value =!isBrokenLine.value;
+    const arr:any = [];
     localEdges.value.forEach((edge:any)=>{
       edge.type = isBrokenLine.value ? 'step' : ''; // type: 'step', // 折线
+      arr.push(edge);
     });
+    localEdges.value = arr;
+    collectEdges();
 }
 // 百分比
 const zoomPercent = ref(1);
