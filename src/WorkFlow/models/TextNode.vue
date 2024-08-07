@@ -16,6 +16,8 @@ import { textNodeParams } from '../data/node-params'
 import { inputTextParam, selectParam, textareaParam, checkBoxParam, deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
 import { saveModelData } from '../../utils/workflow-tools'
+import { useGlobalStore } from '../../store';
+import { debounce, deepClone } from '../../utils'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -31,7 +33,7 @@ const modeRef: any = ref(null);
 const textNode: any = ref({
     openCard:openCard.value,
     input: {
-        inputParams: paramsData.value,
+        inputParams: deepClone(textNodeParams),
     },
     output: {
         // outputParams:paramsData1.value,
@@ -105,6 +107,27 @@ const textNode: any = ref({
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
 });
+const updateType = ref('');
+const debounceUpdateNodeData = debounce((type:string)=>{
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            textNode.value = data.data.metaData || {};
+        }
+    },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
+});
 const selectedValue: any = ref(
     textNode.value.splitString.options
         .filter((item: any) => item.value && item.type !== 'others')
@@ -119,10 +142,11 @@ const inputTitles = ref([
 ]);
 // 新增一条输入框
 const addItemInput = () => {
+    
     const newItemArr = [
         {
             ...inputTextParam,
-            name: 'String' + (paramsData.value.length + 1),
+            name: 'String' + (textNode.value.input.inputParams.length + 1),
             required: false,
             value: '',
             style: {
@@ -160,8 +184,8 @@ const addItemInput = () => {
             }
         },
     ];
-    const id = paramsData.value.length === 0 ? 1 : ((paramsData.value[paramsData.value.length - 1] as any)?.id + 1);
-    (paramsData.value as any).push({
+    const id = textNode.value.input.inputParams.length === 0 ? 1 : ((textNode.value.input.inputParams[textNode.value.input.inputParams.length - 1] as any)?.id + 1);
+    textNode.value.input.inputParams.push({
         id,
         list: newItemArr
     });
@@ -273,8 +297,8 @@ const appSelectChange = (value: string) => {
         textNode.value.string.text = '字符串拼接';
         textNode.value.output.treeData.label = 'String';
         // 输入的第一条可删除
-        paramsData.value[0].list[3].actionDisabled = false;
-        paramsData.value[0].list[3].style = {
+        textNode.value.input.inputParams[0].list[3].actionDisabled = false;
+        textNode.value.input.inputParams[0].list[3].style = {
             marginTop: '6px',
             fontSize: '20px',
             // cursor:'not-allowed'
@@ -284,8 +308,8 @@ const appSelectChange = (value: string) => {
         textNode.value.string.text = '分隔符';
         textNode.value.output.treeData.label = 'Array<String>';
         // 输入的第一条不可删除
-        paramsData.value[0].list[3].actionDisabled = true;
-        paramsData.value[0].list[3].style = {
+        textNode.value.input.inputParams[0].list[3].actionDisabled = true;
+        textNode.value.input.inputParams[0].list[3].style = {
             marginTop: '6px',
             fontSize: '20px',
             cursor: 'not-allowed'
@@ -311,7 +335,7 @@ const selectChange = (options: any) => {
     const { value, i } = options || {};
     if (value == 1) {
         console.log('selectChange', value)
-        paramsData.value[i].list[2] = {
+        textNode.value.input.inputParams[i].list[2] = {
             type: 'select',
             noDataText: '暂无数据',
             warning: '',
@@ -327,7 +351,7 @@ const selectChange = (options: any) => {
         };
     }
     else {
-        paramsData.value[i].list[2] = {
+        textNode.value.input.inputParams[i].list[2] = {
             type: 'input',
             value: '',
             placeholder: '输入参数值',
@@ -366,7 +390,7 @@ onMounted(() => {
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,textNode.value);
+    // saveModelData(nodeId.value,textNode.value);
 
 });
 onUnmounted(() => {
@@ -375,7 +399,9 @@ onUnmounted(() => {
 watch(
     ()=>textNode.value,
     (newValue:any)=>{
-        saveModelData(nodeId.value,newValue);
+        if(updateType.value!=='history'){
+            saveModelData(nodeId.value,newValue);
+        }
     },
     { immediate: true, deep: true }
 );
@@ -431,7 +457,7 @@ watch(
                             </el-tooltip>
                         </template>
                         <div>
-                            <ParamsItem :data="paramsData" key="bmInput" :titles="inputTitles"
+                            <ParamsItem :data="textNode.input.inputParams" key="bmInput" :titles="inputTitles"
                                 :showAddIcon="textNode.select.value === '1'" @addItem="addItemInput"
                                 @selectChange="selectChange" />
                         </div>

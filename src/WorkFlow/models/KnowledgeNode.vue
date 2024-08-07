@@ -9,6 +9,8 @@ import { toopTipText9,toopTipText10,toopTipText11 } from '../data/tooltips'
 import { knowledgeNodeParams } from '../data/node-params'
 import { EventBus } from '../../utils/EventBus'
 import { saveModelData } from '../../utils/workflow-tools'
+import { useGlobalStore } from '../../store';
+import { debounce, deepClone } from '../../utils'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -24,7 +26,7 @@ const modeRef:any = ref(null);
 const knowledgeNode = ref({
     openCard:openCard.value,
     input:{
-        inputParams:paramsData.value,
+        inputParams:deepClone(knowledgeNodeParams),
     },
     output:{
         // outputParams:paramsData1.value,
@@ -54,6 +56,27 @@ const knowledgeNode = ref({
 // 是否打开关闭整个节点
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
+});
+const updateType = ref('');
+const debounceUpdateNodeData = debounce((type:string)=>{
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            knowledgeNode.value = data.data.metaData || {};
+        }
+    },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
 });
 const inputTitles = ref([
     {name:'参数名',flexNum:'3'},
@@ -126,7 +149,7 @@ const selectChange = (options:any) => {
     const { value } = options || {};
     if(value == 1){
         console.log('selectChange', value)
-        paramsData.value[0].list[2] = {
+        knowledgeNode.value.input.inputParams[0].list[2] = {
             type:'select',
             noDataText:'暂无数据',
             warning:'',
@@ -142,7 +165,7 @@ const selectChange = (options:any) => {
         };
     }
     else{
-        paramsData.value[0].list[2] = {
+        knowledgeNode.value.input.inputParams[0].list[2] = {
             type:'input',
             value:'',
             placeholder:'输入参数值',
@@ -162,12 +185,14 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,knowledgeNode.value);
+    // saveModelData(nodeId.value,knowledgeNode.value);
 });
 watch(
     ()=>knowledgeNode.value,
     (newValue:any)=>{
-        saveModelData(nodeId.value,newValue);
+        if(updateType.value!=='history'){
+            saveModelData(nodeId.value,newValue);
+        }
     },
     { immediate: true, deep: true }
 );
@@ -226,7 +251,7 @@ watch(
                             </el-tooltip>
                         </template>
                         <div>
-                            <ParamsItem :data="paramsData"
+                            <ParamsItem :data="knowledgeNode.input.inputParams"
                             key="bmInput"
                             :titles="inputTitles"
                             :showAddIcon="false"

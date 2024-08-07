@@ -16,6 +16,8 @@ import { EventBus } from '../../utils/EventBus'
 import { publicTools } from '../data';
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { saveModelData } from '../../utils/workflow-tools'
+import { useGlobalStore } from '../../store';
+import { debounce, deepClone } from '../../utils'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -78,6 +80,27 @@ const conditionNode:any = ref({
 // 是否打开关闭整个节点
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
+});
+const updateType = ref('');
+const debounceUpdateNodeData = debounce((type:string)=>{
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            conditionNode.value = data.data.metaData || {};
+        }
+    },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
 });
 // 计算是否展示标签 （优先级n）
 const computedShowLabel = computed(() => {
@@ -317,12 +340,14 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,conditionNode.value);
+    // saveModelData(nodeId.value,conditionNode.value);
 });
 watch(
     ()=>conditionNode.value,
     (newValue:any)=>{
-        saveModelData(nodeId.value,newValue);
+        if(updateType.value!=='history'){
+            saveModelData(nodeId.value,newValue);
+        }
     },
     { immediate: true, deep: true }
 );

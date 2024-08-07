@@ -29,18 +29,23 @@ const dragMousedown = ()=>{
 const dragMouseleave = ()=>{
     emit('dragMouseleave');
 }
-
+const showPage = ref(true);
 watch(
-    ()=>draggableList.value,
+    ()=>props.draggableList,
     (newValue:any)=>{
         console.log('update list ', newValue);
         draggableList.value = newValue;
+        showPage.value = false;
+        setTimeout(()=>{
+            showPage.value = true;
+        },10);
     }
 );
 
 </script>
 <template>
     <div class="draggable-list-wrapper" v-for="(item,i) in draggableList"
+    v-if="showPage"
     :class="props.listClass"
     :draggable="props.draggable"
     @dragenter="dragenterItem(item,i)"

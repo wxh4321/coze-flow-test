@@ -15,7 +15,7 @@ import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } 
 import { EventBus } from '../../utils/EventBus'
 import { saveModelData } from '../../utils/workflow-tools'
 import { useGlobalStore } from '../../store';
-import { deepClone } from '../../utils'
+import { debounce, deepClone } from '../../utils'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -92,8 +92,7 @@ eventBus.on('openCard', (value: any) => {
     openCard.value = value;
 });
 const updateType = ref('');
-// 通过undo redo更新数据 type 标识更新种类
-eventBus.on('updateNodeData', (type: string) => {
+const debounceUpdateNodeData = debounce((type:string)=>{
     updateType.value = type;
     if(type!=='history'){
         return;
@@ -107,6 +106,11 @@ eventBus.on('updateNodeData', (type: string) => {
             bigModelNode.value = data.data.metaData || {};
         }
     },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
 });
 const inputTitles = ref([
     {name:'参数名',flexNum:'4'},
@@ -276,17 +280,13 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,bigModelNode.value);
+    // saveModelData(nodeId.value,bigModelNode.value);
 });
 watch(
     ()=>bigModelNode.value,
     (newValue:any)=>{
         if(updateType.value!=='history'){
             saveModelData(nodeId.value,newValue);
-        }
-        else{
-            console.log('data111 ..... ', updateType.value);
-
         }
     },
     { immediate: true, deep: true }

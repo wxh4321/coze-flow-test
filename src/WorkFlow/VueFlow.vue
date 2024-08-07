@@ -166,6 +166,7 @@ const addEndNode = () => {
   })
 }
 const addRandomNode = (nodeId: string, position: any) => {
+  collectNodes();
   if (!nodesTypeObj[nodeId]) {
     ElMessage({
       message: '此节点类型还在建设中...',
@@ -198,8 +199,7 @@ const addNodeDebounce = debounce(() => {
   console.log('add node', dragNodeData.value.id + '-' + (vueFlowNodeId));
   addRandomNode(dragNodeData.value.id, dragNodeData.value.position);
 }, 500)
-
-const localNodesDebounce = debounce(() => {
+const collectNodes = () => {
   console.log('localNodesDebounce ', nodes);
   // flowData.value.nodes = nodes;
   globalStore.setWorkFlowState({
@@ -209,9 +209,8 @@ const localNodesDebounce = debounce(() => {
       nodes:nodes.value
     }
   });
-}, 100);
-
-const localEdgesDebounce = debounce(() => {
+}
+const collectEdges = () => {
   console.log('localEdgesDebounce ', edges);
   // flowData.value.edges = edges;
   globalStore.setWorkFlowState({
@@ -222,7 +221,11 @@ const localEdgesDebounce = debounce(() => {
       nodes:nodes.value
     }
   });
-}, 100);
+}
+
+const localNodesDebounce = debounce(collectNodes, 100);
+
+const localEdgesDebounce = debounce(collectEdges, 100);
 
 onConnect((params: any) => {
   // 收集数据
@@ -282,28 +285,16 @@ eventBus.on('updateNodeData', (type: string) => {
       if(key!=='label'){
         node[key] = item[key];
       }
+      else{
+        const nodeId = item.id.split('-')[0];
+        node[key] = markRaw(nodesTypeObj[nodeId]);
+      }
     });
-    // // removeNodes([node]);
-    // updateNode(node.id, node);
     localNodesTmp.push(node);
   });
-  // if(localNodesTmp.length){
-  //   addNodes(localNodesTmp);
-  // }
-  // data?.edges?.forEach((item:any)=>{
-  //   const edge:any = findEdge(item.id)||{};
-  //   if(Object.keys(edge).length){
-  //     removeEdges([edge]);
-  //   }
-  // });
-  // if(data?.edges?.length){
-  //   addEdges(data.edges);
-  // }
 
-  // setTimeout(()=>{
-    localNodes.value = localNodesTmp;
-    localEdges.value = data?.edges|| [];
-  // },0);
+  localNodes.value = localNodesTmp;
+  localEdges.value = data?.edges|| [];
   console.log('localNodes ', localNodes.value)
   console.log('localEdges ', localEdges.value)
 });
@@ -319,6 +310,7 @@ eventBus.on('clickAddNode', (data: any) => {
 eventBus.on('deleteNode', (data: any) => {
   console.log('delete node', data.id || '');
   removeNodes(data.id);
+  collectNodes();
 });
 // 设置当前节点为可拖拽
 eventBus.on('makeDraggable', (data: any) => {
@@ -346,11 +338,14 @@ eventBus.on('openKnowledgeDialog', (data: any) => {
 // 保存model节点数据
 eventBus.on('saveModelData', (payload: any) => {
   const { id, data } = payload || {};
-  globalStore.workFlowData?.flowData?.nodes?.forEach((node: any) => {
-    if (node.id === id) {
-      node.data.metaData = data;
-    }
-  });
+  if(data && id){
+    globalStore.workFlowData?.flowData?.nodes?.forEach((node: any) => {
+      if (node.id === id) {
+        node.data.metaData = data;
+      }
+    });
+  }
+  collectNodes();
 });
 const onMoveEnd = (e: FlowEvents['moveEnd']) => {
   console.log('zoom/move end', e.flowTransform)

@@ -7,6 +7,8 @@ import { toopTipText, toopTipText1 } from '../data/tooltips'
 import { startNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '@/utils/EventBus.ts'
+import { useGlobalStore } from '../../store';
+import { debounce, deepClone } from '../../utils';
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -18,11 +20,33 @@ const modeRef: any = ref(null);
 
 // 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const startNode = ref({
+    inputParams:deepClone(startNodeParams),
     openCard:openCard.value,
 });
 // 是否打开关闭整个节点
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
+});
+const updateType = ref('');
+const debounceUpdateNodeData = debounce((type:string)=>{
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            startNode.value = data.data.metaData || {};
+        }
+    },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
 });
 const collapseArr = ['input'];
 const openAll = () => {
@@ -91,8 +115,8 @@ const addItem = () => {
             ...deleteIconParam,
         },
     ];
-    const id = paramsData.value.length===0?1:(paramsData.value[paramsData.value.length - 1].id+1);
-    paramsData.value.push({
+    const id = startNode.value.inputParams.length===0?1:(startNode.value.inputParams[startNode.value.inputParams.length - 1].id+1);
+    startNode.value.inputParams.push({
         id,
         list: newItemArr
     });
@@ -103,12 +127,14 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    eventBus.emit('saveModelData', {id:nodeId.value,data:startNode.value});
+    // eventBus.emit('saveModelData', {id:nodeId.value,data:startNode.value});
 });
 watch(
     ()=>startNode.value,
     (newValue:any)=>{
-        eventBus.emit('saveModelData', {id:nodeId.value,data:newValue});
+        if(updateType.value!=='history'){
+            eventBus.emit('saveModelData', {id:nodeId.value,data:newValue});
+        }
     },
     { immediate: true, deep: true }
 );
@@ -171,7 +197,7 @@ watch(
                         
                     </template>
                     <div>
-                        <ParamsItem :data="paramsData"
+                        <ParamsItem :data="startNode.inputParams"
                         @addItem="addItem"
                         />
                     </div>

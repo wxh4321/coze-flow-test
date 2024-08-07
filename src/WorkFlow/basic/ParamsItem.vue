@@ -71,15 +71,20 @@ const textareaBlur = () => {
 const addItem = () => {
     emit('addItem');
 }
-
+const showPage = ref(true);
 
 watch(
-    () => paramsData.value,
+    () => props.data,
     (val) => {
-        console.log('save params data ', val);
-        saveParams();
+        console.log('change data ', val);
+        paramsData.value = val;
+        showPage.value = false;
+        setTimeout(()=>{
+            showPage.value = true;
+        },10);
+        // saveParams();
     },
-    { immediate: true, deep: true }
+    // { immediate: true, deep: true }
 );
 </script>
 <template>
@@ -90,77 +95,79 @@ watch(
             <div class="p-i-title">{{item.name||''}}</div>
         </div>
     </div>
-    <div class="params-item-wrapper" v-for="(item,i) in paramsData"
-    :key="item.id"
-    >
-        <div :class="[props.titles[j].flexNum?('flex-'+props.titles[j].flexNum):'p-i-col-'+(j+1)]" v-for="(v,j) in item.list"
-        :key="j"
+    <div v-if="showPage">
+        <div class="params-item-wrapper" v-for="(item,i) in paramsData"
+        :key="item.id"
         >
-            <div class="p-i-content" 
-            :key="'content'+j"
+            <div :class="[props.titles[j].flexNum?('flex-'+props.titles[j].flexNum):'p-i-col-'+(j+1)]" v-for="(v,j) in item.list"
+            :key="j"
             >
-                <div v-if="v.type==='input'" class="p-i-content-item"
-                :class="[
-                    v.cutBorderRight?'p-i-c-border-input-right':'',
-                    v.cutBorderLeft?'p-i-c-border-input-left':'',
-                ]"
+                <div class="p-i-content" 
+                :key="'content'+j"
                 >
-                    <el-input v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
-                    :style="v.style"
-                    />
-                </div>
-                <div v-if="v.type==='input-text'" class="p-i-content-item">
-                    <div class="p-i-input-text"
-                    :style="v.style"
+                    <div v-if="v.type==='input'" class="p-i-content-item"
+                    :class="[
+                        v.cutBorderRight?'p-i-c-border-input-right':'',
+                        v.cutBorderLeft?'p-i-c-border-input-left':'',
+                    ]"
                     >
-                        <span class="p-i-i-name">{{v.name}}</span>
-                        <span class="p-i-i-required" v-if="v.required">*</span>
-                        <div class="p-i-i-value" v-if="v.value">{{v.value}}</div>
+                        <el-input v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
+                        :style="v.style"
+                        />
                     </div>
-                </div>
-                <div v-if="v.type==='textarea'" class="p-i-content-item"
-                :class="[focusIndex===i?'p-i-c-focus':'p-i-c-nofocus']"
-                >
-                    <el-input type="textarea" v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
-                    :maxlength="v.maxlength"
-                    @focus="textareaFocus(i)"
-                    @blur="textareaBlur"
-                    :show-word-limit="v.showWordLimit"
-                    :style="v.style"
-                    />
-                </div>
-                <div v-if="v.type==='select'" class="p-i-content-item"
-                :class="[
-                    v.cutBorderRight?'p-i-c-border-select-right':'',
-                    v.cutBorderLeft?'p-i-c-border-select-left':'',
-                ]"
-                >
-                    <el-select v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
-                    :no-data-text="v.noDataText"
-                    :style="v.style"
-                    @change="(value:any)=>{selectChange(value,item,i,j)}"
-
-                    >
-                        <el-option
-                            v-for="(oItem,opIndex) in v.options"
-                            :key="opIndex"
-                            :label="oItem.label"
-                            :value="oItem.value"
+                    <div v-if="v.type==='input-text'" class="p-i-content-item">
+                        <div class="p-i-input-text"
+                        :style="v.style"
                         >
-                        </el-option>
-                    </el-select>
-                </div>
-                <div v-if="v.type==='checkbox'" class="p-i-content-item">
-                    <el-checkbox v-model="v.selected" :disabled="v.disabled"
-                    :style="v.style"
-                    >{{v.value}}</el-checkbox>
-                </div>
-                <div v-if="v.type==='delete-icon'" class="p-i-content-item">
-                    <el-icon class="p-i-w-delete-icon" @click="deleteItem(item,i,v)" v-if="!v.disabled"
-                    :style="v.style"
+                            <span class="p-i-i-name">{{v.name}}</span>
+                            <span class="p-i-i-required" v-if="v.required">*</span>
+                            <div class="p-i-i-value" v-if="v.value">{{v.value}}</div>
+                        </div>
+                    </div>
+                    <div v-if="v.type==='textarea'" class="p-i-content-item"
+                    :class="[focusIndex===i?'p-i-c-focus':'p-i-c-nofocus']"
                     >
-                        <DeleteIcon />
-                    </el-icon>
+                        <el-input type="textarea" v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
+                        :maxlength="v.maxlength"
+                        @focus="textareaFocus(i)"
+                        @blur="textareaBlur"
+                        :show-word-limit="v.showWordLimit"
+                        :style="v.style"
+                        />
+                    </div>
+                    <div v-if="v.type==='select'" class="p-i-content-item"
+                    :class="[
+                        v.cutBorderRight?'p-i-c-border-select-right':'',
+                        v.cutBorderLeft?'p-i-c-border-select-left':'',
+                    ]"
+                    >
+                        <el-select v-model="v.value" :placeholder="v.placeholder" :disabled="v.disabled"
+                        :no-data-text="v.noDataText"
+                        :style="v.style"
+                        @change="(value:any)=>{selectChange(value,item,i,j)}"
+
+                        >
+                            <el-option
+                                v-for="(oItem,opIndex) in v.options"
+                                :key="opIndex"
+                                :label="oItem.label"
+                                :value="oItem.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </div>
+                    <div v-if="v.type==='checkbox'" class="p-i-content-item">
+                        <el-checkbox v-model="v.selected" :disabled="v.disabled"
+                        :style="v.style"
+                        >{{v.value}}</el-checkbox>
+                    </div>
+                    <div v-if="v.type==='delete-icon'" class="p-i-content-item">
+                        <el-icon class="p-i-w-delete-icon" @click="deleteItem(item,i,v)" v-if="!v.disabled"
+                        :style="v.style"
+                        >
+                            <DeleteIcon />
+                        </el-icon>
+                    </div>
                 </div>
             </div>
         </div>

@@ -7,6 +7,8 @@ import { endNodeParams } from '../data/node-params'
 import { inputParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
 import { saveModelData } from '../../utils/workflow-tools'
+import { useGlobalStore } from '../../store';
+import { debounce, deepClone } from '../../utils'
 
 const eventBus = EventBus();
 const nodeId = ref('');
@@ -20,7 +22,7 @@ const modeRef: any = ref(null);
 // 需要出现在历史数据 做 redo undo的数据，都放在下面的数据结构中
 const endNode = ref({
     openCard:openCard.value,
-    outputParams:paramsData.value,
+    outputParams:deepClone(endNodeParams),
     answer:{
         value:'1',
         placeholder:'',
@@ -48,6 +50,27 @@ const endNode = ref({
 // 是否打开关闭整个节点
 eventBus.on('openCard', (value: any) => {
     openCard.value = value;
+});
+const updateType = ref('');
+const debounceUpdateNodeData = debounce((type:string)=>{
+    updateType.value = type;
+    if(type!=='history'){
+        return;
+    }
+    setTimeout(()=>{
+        // 更新数据
+        const globalStore = useGlobalStore();
+        const data = globalStore.getNodeDataById(nodeId.value);
+        console.log('data ..... ', data);
+        if(data?.data?.metaData){
+            endNode.value = data.data.metaData || {};
+        }
+    },100);
+}, 100);
+
+// 通过undo redo更新数据 type 标识更新种类
+eventBus.on('updateNodeData', (type: string) => {
+    debounceUpdateNodeData(type);
 });
 const titles = ref([
     {name:'参数名',flexNum:'1'},
@@ -136,8 +159,9 @@ const addItem = () => {
             }
         },
     ];
-    const id = paramsData.value.length===0?1:((paramsData.value[paramsData.value.length - 1] as any)?.id+1);
-    (paramsData.value as any).push({
+    
+    const id = endNode.value.outputParams.length===0?1:((endNode.value.outputParams[endNode.value.outputParams.length - 1] as any)?.id+1);
+    endNode.value.outputParams.push({
         id,
         list: newItemArr
     });
@@ -148,12 +172,14 @@ onMounted(()=>{
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     nodeId.value = id;
-    saveModelData(nodeId.value,endNode.value);
+    // saveModelData(nodeId.value,endNode.value);
 });
 watch(
     ()=>endNode.value,
     (newValue:any)=>{
-        saveModelData(nodeId.value,newValue);
+        if(updateType.value!=='history'){
+            saveModelData(nodeId.value,newValue);
+        }
     },
     { immediate: true, deep: true }
 );
@@ -215,7 +241,7 @@ watch(
                             </el-tooltip>
                         </template>
                         <div>
-                            <ParamsItem :data="paramsData"
+                            <ParamsItem :data="endNode.outputParams"
                             @addItem="addItem"
                             :titles="titles"
                             />
