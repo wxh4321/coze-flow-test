@@ -71,17 +71,15 @@ const textareaBlur = () => {
 const addItem = () => {
     emit('addItem');
 }
-const showPage = ref(true);
+const showPageIndex = ref(0);
 
 watch(
     () => props.data,
     (val) => {
         console.log('change data ', val);
         paramsData.value = val;
-        showPage.value = false;
-        setTimeout(()=>{
-            showPage.value = true;
-        },10);
+        showPageIndex.value += 1;
+       
         // saveParams();
     },
     // { immediate: true, deep: true }
@@ -95,7 +93,7 @@ watch(
             <div class="p-i-title">{{item.name||''}}</div>
         </div>
     </div>
-    <div v-if="showPage">
+    <div :key="showPageIndex">
         <div class="params-item-wrapper" v-for="(item,i) in paramsData"
         :key="item.id"
         >
