@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import RightArrowIcon from '../icons/RightArrowIcon.vue';
 import ModelTreeTextItem from '../basic/ModelTreeTextItem.vue';
 
 const props:any = defineProps({
@@ -40,9 +39,10 @@ const openOrCloseCard = () => {
             <el-button class="m-t-t-icon" 
             v-if="root.children && root.children.length"
             :class="[openCard?'m-t-t-is-active':'']"
-            :icon="RightArrowIcon"
             @click="openOrCloseCard" 
-            />
+            >
+                <IconRightArrow />
+            </el-button>
             <span class="m-t-t-title">{{root.title}}</span>
             <span class="m-t-t-label">{{root.label}}</span>
         </div>

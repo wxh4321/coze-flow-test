@@ -4,8 +4,6 @@ interface titleProp {
     flexNum: string;
 }
 type titleProps  = titleProp[];
-import DeleteIcon from '../icons/DeleteIcon.vue';
-import AddIcon from '../icons/AddIcon.vue';
 
 const focusIndex = ref(-1);
 const props = defineProps({
@@ -163,7 +161,7 @@ watch(
                         <el-icon class="p-i-w-delete-icon" @click="deleteItem(item,i,v)" v-if="!v.disabled"
                         :style="v.style"
                         >
-                            <DeleteIcon />
+                            <IconDelete />
                         </el-icon>
                     </div>
                 </div>
@@ -171,10 +169,10 @@ watch(
         </div>
     </div>
     <div class="params-item-footer" v-if="props.showAddIcon">
-        <el-button :icon="AddIcon"
+        <el-button
         class="p-i-f-button"
         @click="addItem"
-        >新增</el-button>
+        ><IconAdd class="icon"/>新增</el-button>
     </div>
 </template>
 <style lang="scss" scoped>
@@ -246,6 +244,9 @@ watch(
     border-color: transparent;
     border-radius: 8px;
     padding: 4px!important;
+    .icon{
+        margin-right: 4px;
+    }
 }
 .w26{
     width: 26px;

@@ -19,13 +19,10 @@ const deleteNode = () => {
 <template>
     <div class="basic-n-t-right">
         <el-button class="basic-n-t-r-icon" 
-        :icon="TestRunIcon"
         @click="testRun" 
-        />
+        ><IconTestRun/></el-button>
         <el-dropdown size="small">
-            <el-button class="basic-n-t-r-omit-icon" 
-            :icon="OmitIcon"
-            />
+            <el-button class="basic-n-t-r-omit-icon"><IconOmit/></el-button>
             <template #dropdown>
                 <el-dropdown-menu>
                     <el-dropdown-item @click="reName">重命名</el-dropdown-item>

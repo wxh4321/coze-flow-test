@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import CopyIcon from '../icons/CopyIcon.vue';
-import VideoIcon from '../icons/VideoIcon.vue';
 
 import {
     ArrowRightBold,
@@ -31,19 +29,23 @@ const copyResult = () => {
     <div class="workflow-run-result-content" v-if="props.data && props.data.length">
         <div class="w-r-r-text-area">
             <span>输出变量</span>
-            <el-button :icon="CopyIcon"
+            <el-button 
             class="w-r-r-text-icon"
             @click="copyResult"
-            />
+            >
+                <IconCopy/>
+            </el-button>
         </div>
         <div class="w-r-r-json">
             <span><span class="w-r-r-json-key">{{'gggg'}}</span> : {{'88uuuuu - ggggg -  88uuuuu'}}</span>
         </div>
     </div>
     <div v-else class="workflow-run-result-content w-r-flex">
-        <el-button :icon="VideoIcon"
+        <el-button
         class="w-r-icon"
-        />
+        >
+            <IconVideo/>
+        </el-button>
         <div class="w-r-text">暂无运行结果</div>
         <div class="w-r-subtext">点击“试运行”按钮，运行结果将会在这里显示</div>
     </div>
