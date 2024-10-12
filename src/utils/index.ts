@@ -63,9 +63,8 @@ export function throttle(
   if (options.end === undefined) {
     options.end = true
   }
-  function tempFunc() {
+  function tempFunc(...args: any[]) {
     context = this
-    args = arguments
     now = +new Date() //当前时间戳，每一次调用throttled函数，都会重新获取now，计算时间差。
     //第一次调用时才会满足条件。且first为false表示不立即执行。
     if (!previous && options.first === false) previous = now
@@ -91,7 +90,7 @@ export function throttle(
         previous = options.first === false ? 0 : new Date().getTime()
         timer = null
         func.apply(context, args)
-        if (!timer) context = args = null
+        if (!timer) context = null
       }, remaining)
     }
   }

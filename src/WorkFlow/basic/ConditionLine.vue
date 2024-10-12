@@ -81,9 +81,6 @@ const props = defineProps({
     align-items: center;
     border-radius: 8px;
     padding:6px 4px;
-    &:hover{
-        background-color: var(--el-color-primary-light-9);
-    }
 }
 .c-l-up,
 .c-l-down

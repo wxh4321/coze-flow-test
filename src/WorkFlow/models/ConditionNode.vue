@@ -2,14 +2,12 @@
 import ArrowDown from '../icons/ArrowDown.vue'
 import RightIcon from '../icons/RightIcon.vue'
 import DragIcon from '../icons/DragIcon.vue'
-import NoticeIcon from '../icons/NoticeIcon.vue'
 import DeleteIcon from '../icons/DeleteIcon.vue';
 import AddIcon from '../icons/AddIcon.vue';
 import ParamsItem from '../basic/ParamsItem.vue'
 import ModelHeaderRight from '../basic/ModelHeaderRight.vue'
 import DraggableList from '../basic/DraggableList.vue'
 import ConditionLine from '../basic/ConditionLine.vue'
-import { toopTipText9,toopTipText10,toopTipText11 } from '../data/tooltips'
 import { conditionNodeParams } from '../data/node-params'
 import { condDescParam, selectParam, textareaParam,checkBoxParam,deleteIconParam } from '../data/node-params-template'
 import { EventBus } from '../../utils/EventBus'
@@ -127,7 +125,6 @@ const showConditionLine = computed(() => {
     return (data:any)=>{
         const list = data?.paramsData||[];
         const len = list.length;
-        console.log('showConditionLine len ', len);
         if(len>1){
             return true;
         }
@@ -135,7 +132,9 @@ const showConditionLine = computed(() => {
     };
 
 });
-
+const updateList = (list:any) => {
+    conditionNode.value.draggableListData = list;
+}
 const emit = defineEmits(['testRun']);
 
 // 运行本节点
@@ -317,14 +316,14 @@ const setItem = (index:number,i:number,j:number,data={}) => {
 const dragMousedown = ()=>{
     console.log('dragMousedown');
     listDraggable.value = true;
-    // 设置当前节点为可拖拽
-    // eventBus.emit('makeDraggable', {id: ctx.$parent.id});
+    // 设置幕布不为可拖拽
+    eventBus.emit('makeDraggable', false);
 }
 const dragMouseleave = ()=>{
     console.log('dragMouseleave');
     listDraggable.value = false;
-    // 设置当前节点为可拖拽
-    // eventBus.emit('makeDraggable', {id: ctx.$parent.id});
+    // 设置幕布为可拖拽
+    eventBus.emit('makeDraggable', true);
 }
 const handleMousedown = ()=>{
     console.log('handleMousedown');
@@ -393,11 +392,13 @@ watch(
             :draggable="listDraggable" 
             :draggableList="conditionNode.draggableListData"
             :listClass="'cond-model-node-content-item'"
+            @updateList="updateList"
             >
                 <template #default="{data,index}:{ data:any,index:number }">
                     <div class="cm-n-drag-title">
                         <el-button class="cm-n-drag-icon" 
                         :icon="DragIcon"
+                        v-if="index!==conditionNode.draggableListData.length-1"
                         @mousedown="dragMousedown"
                         @mouseleave="dragMouseleave"
                         />

@@ -312,14 +312,10 @@ eventBus.on('deleteNode', (data: any) => {
   removeNodes(data.id);
   collectNodes();
 });
+const makeDraggable = ref(true);
 // 设置当前节点为可拖拽
-eventBus.on('makeDraggable', (data: any) => {
-  console.log('makeNodeDraggable ', data.id || '');
-  const node: any = {
-    ...(findNode(data.id))
-  };
-  node.draggable = true;
-  updateNode(data.id, node);
+eventBus.on('makeDraggable', (state: any) => {
+  makeDraggable.value = state;
 });
 // 设置当前节点为不可拖拽
 eventBus.on('disabledDraggable', (data: any) => {
@@ -434,39 +430,13 @@ onMounted(() => {
   addEndNode();
   zoomTo(zoomPercent.value);
 });
-// watch(
-//   () => localNodes.value,
-//   (newValue: any) => {
-//     localNodesDebounce(newValue);
-//   },
-//   { immediate: true, deep: true }
-// );
-// watch(
-//   () => localEdges.value,
-//   (newValue: any) => {
-//     // localEdgesDebounce(newValue);
-//     console.log('watch localEdges ', newValue)
 
-//   },
-//   { immediate: true, deep: true }
-// );
-
-// watch(
-//   ()=>flowData.value,
-//   (newValue:any)=>{
-//     if(updateType.value!=='history'){
-//       flowDataDebounce(newValue);
-//     }
-//     else{
-//       console.log('flowDataDebounce 12132434');
-//     }
-//   },
-//   { immediate: true, deep: true }
-// );
 </script>
 <template>
   <VueFlow @dragleave="vueFlowDragLeave" @onMoveEnd="onMoveEnd"
   v-model:nodes="localNodes" v-model:edges="localEdges"
+  :nodesDraggable="makeDraggable"
+  :panOnDrag="makeDraggable"
   >
     <!-- <MiniMap /> -->
     <FlowControls 
