@@ -149,6 +149,8 @@ const deleteNode = () => {
     const parent = modeRef.value.parentNode;
     const id = parent.getAttribute('data-id');
     eventBus.emit('deleteNode', {id});
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const openOrCloseCard = () => {
     openCard.value = !openCard.value;
@@ -208,7 +210,6 @@ const addItem = (index:number) => {
     });
 }
 const addBranch = () => {
-    console.log('addBranch ', publicTools.dragId)
     const len = conditionNode.value.draggableListData.length;
     conditionNode.value.draggableListData.splice(len-1,0,{
         id: publicTools.dragId++,
@@ -220,15 +221,17 @@ const addBranch = () => {
             ...JSON.parse(JSON.stringify(conditionNodeParams))
         ]
     });
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const deleteItem = (params:any,colIndex:number) => {
     const { item,index } = params||{};
     const len = conditionNode.value.draggableListData[colIndex]?.paramsData?.length;
-    console.log('deleteItem', item,index,colIndex);
-    console.log('deleteItem len', len);
     if(len===0){// len 为 0 同时删除当前分支
         deleteBranch(colIndex);
     }
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const deleteBranch = (index:number) => {
     if(computedDisabledBranchDelIcon.value(index)){
@@ -245,6 +248,8 @@ const deleteBranch = (index:number) => {
             disabled:true
         });
     }
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const selectChange = (options:any,index:number) => {
     const { value,i } = options || {};
@@ -279,6 +284,8 @@ const selectChange = (options:any,index:number) => {
             cutBorderLeft:true,
         };
     }
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const setItem = (index:number,i:number,j:number,data={}) => {
     if(i==-1){
@@ -312,18 +319,19 @@ const setItem = (index:number,i:number,j:number,data={}) => {
     }
     
 }
-
+const updateComponentDragState = (state:boolean = false) => {
+    listDraggable.value = state;
+    // 设置幕布 可拖拽状态
+    eventBus.emit('makeDraggable', !state);
+}
 const dragMousedown = ()=>{
     console.log('dragMousedown');
-    listDraggable.value = true;
-    // 设置幕布不为可拖拽
-    eventBus.emit('makeDraggable', false);
+    updateComponentDragState(true);
 }
 const dragMouseleave = ()=>{
     console.log('dragMouseleave');
-    listDraggable.value = false;
-    // 设置幕布为可拖拽
-    eventBus.emit('makeDraggable', true);
+    // 更新组件可拖拽状态
+    updateComponentDragState();
 }
 const handleMousedown = ()=>{
     console.log('handleMousedown');
@@ -387,7 +395,9 @@ watch(
                 <span class="c-m-n-r-text">新增分支</span>
             </div>
         </div>
-        <div class="cond-model-node-content mt12">
+        <div class="cond-model-node-content mt12" 
+        @mouseleave="dragMouseleave"
+        >
             <DraggableList 
             :draggable="listDraggable" 
             :draggableList="conditionNode.draggableListData"

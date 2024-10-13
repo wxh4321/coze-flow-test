@@ -21,14 +21,10 @@ const props = defineProps({
     }
 });
 const draggableList = ref(props.draggableList);
-const handleDragEnter = (item:any,i:number) => {
-    console.log('dragenterItem ', item, i);
-    emit('updateList',draggableList.value); // 更新列表的目的是数据同步
-}
+
 // 拖拽改变列表位置
 const changeListDebounce = debounce((targetIndex:number,sourceIndex:number) => {
     let list:any = [...draggableList.value];
-    const tmpTargetItem:any = list[targetIndex];
     const tmpSourceItem:any = list[sourceIndex];
     list[sourceIndex] = null;
     let tmpTargetIndex = -1;
