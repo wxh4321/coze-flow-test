@@ -11,9 +11,10 @@ coze 工作流 官网截图，2024年版本
 ![coze_png](./images/coze-page.jpg)
 
 ## 安装教程
-1. 安装pnpm：pnpm install
-2. 安装依赖：pnpm 9.3 pnpm install
-3. 启动开发服务器：pnpm dev
+1. 安装pnpm：npm install -g pnpm
+2. Node.js版本要求：v16.0.0 或更高
+3. 安装项目依赖：pnpm install
+4. 启动开发服务器：pnpm dev
 
 ## 声明
 1. 图标、样式等参考coze官网，技术栈选择是个人抉择。

@@ -10,9 +10,11 @@ This software architecture is a dragabble workflow based on ByteDance's technolo
 Screenshot of the official website of the Coze workflow in 2024
 ![coze_png](./images/coze-page.jpg).
 
-#### Installation Tutorial
-- pnpm 9.3 pnpm install
-- pnpm dev
+## Installation Guide
+1. Install pnpm: npm install -g pnpm
+2. Node.js version requirement: v16.0.0 or higher
+3. Install project dependencies: pnpm install
+4. Start development server: pnpm dev
 
 #### Disclaimer
 Icons and styles are for reference only and the choice of the technical stack is a personal decision.
