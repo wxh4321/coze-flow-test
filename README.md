@@ -12,7 +12,7 @@ coze 工作流 官网截图，2024年版本
 
 ## 安装教程
 1. 安装pnpm：npm install -g pnpm
-2. Node.js版本要求：v16.0.0 或更高
+2. Node.js版本要求：v18.12.0 或更高
 3. 安装项目依赖：pnpm install
 4. 启动开发服务器：pnpm dev
 
