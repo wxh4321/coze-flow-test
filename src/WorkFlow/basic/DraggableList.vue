@@ -61,7 +61,7 @@ const targetDatasetIndex = ref(-1)
 const handleDragEnd = (e:any,item:any,i:number) => {
     e.preventDefault();
     if(targetDatasetIndex.value===i) return
-    e.dataTransfer.dropEffect ='none';
+    e.dataTransfer.dropEffect = 'none';
     changeListDebounce(targetDatasetIndex.value,datasetIndex.value);
 }
 const handleDragOver = (e:any,item:any,i:number) => {
