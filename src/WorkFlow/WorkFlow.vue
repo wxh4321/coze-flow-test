@@ -13,7 +13,7 @@ import {
 import WorkFlowRunResultIcon from './icons/WorkFlowRunResultIcon.vue';
 import RunIcon from './icons/RunIcon.vue';
 import MenuIcon from './icons/MenuIcon.vue';
-import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCloseIcon.vue';
+import WorkFlowCloseIcon from './icons/WorkFlowCloseIcon.vue';
 
 import { modelItemDataProp } from './data/data';
 import { debounce, deepClone } from '../utils'
@@ -126,7 +126,7 @@ watch(
             <template #header="{}">
                 <div class="w-try-run-flex">
                     <el-button class="w-try-run-close-icon" 
-                    :icon="WorkFlowRunResultCloseIcon"
+                    :icon="WorkFlowCloseIcon"
                     @click="closeResult" 
                     />
                     <span class="w-try-run-close-title">试运行</span>
