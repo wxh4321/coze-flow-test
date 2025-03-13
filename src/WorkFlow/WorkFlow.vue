@@ -13,7 +13,7 @@ import {
 import WorkFlowRunResultIcon from './icons/WorkFlowRunResultIcon.vue';
 import RunIcon from './icons/RunIcon.vue';
 import MenuIcon from './icons/MenuIcon.vue';
-import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCLoseIcon.vue';
+import WorkFlowRunResultCloseIcon from './icons/WorkFlowRunResultCloseIcon.vue';
 
 import { modelItemDataProp } from './data/data';
 import { debounce, deepClone } from '../utils'

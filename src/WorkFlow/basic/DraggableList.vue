@@ -57,12 +57,19 @@ const changeListDebounce = debounce((targetIndex:number,sourceIndex:number) => {
     emit('updateList',list); // 更新列表的目的是数据同步
 }, 10)
 const datasetIndex = ref(-1)
+const targetDatasetIndex = ref(-1)
+const handleDragEnd = (e:any,item:any,i:number) => {
+    e.preventDefault();
+    if(targetDatasetIndex.value===i) return
+    e.dataTransfer.dropEffect ='none';
+    changeListDebounce(targetDatasetIndex.value,datasetIndex.value);
+}
 const handleDragOver = (e:any,item:any,i:number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect ='move';
     if(i===draggableList.value.length-1) return;
     if(datasetIndex.value === i) return;
-    changeListDebounce(i,datasetIndex.value);
+    targetDatasetIndex.value = i;
 }
 
 const handleDragStart = (e:any,i:number) => {
@@ -73,7 +80,6 @@ const showPageIndex = ref(0);
 watch(
     ()=>props.draggableList,
     (newValue:any)=>{
-        console.log('update list ', newValue);
         draggableList.value = newValue;
         showPageIndex.value += 1;
     }
@@ -85,6 +91,7 @@ watch(
     :key="showPageIndex"
     :class="props.listClass"
     :draggable="props.draggable && i!==draggableList.length-1"
+    @dragend="(e:any)=>{handleDragEnd(e,item,i)}"
     @dragover="(e:any)=>{handleDragOver(e,item,i)}"
     @dragstart="(e:any)=>{handleDragStart(e,i)}"
     >

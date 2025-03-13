@@ -39,11 +39,7 @@ const {
 } = useVueFlow()
 import StartNode from './models/StartNode.vue'
 import EndNode from './models/EndNode.vue'
-import BigModelNode from './models/BigModelNode.vue'
-import KnowledgeNode from './models/KnowledgeNode.vue'
 import KnowledgeModelDialog from './components/KnowledgeModelDialog.vue'
-import TextNode from './models/TextNode.vue'
-import ConditionNode from './models/ConditionNode.vue'
 
 import { EventBus } from '../utils/EventBus';
 
@@ -69,14 +65,7 @@ const isBrokenLine = ref(false);
  * 具体看查看每个节点的样式
  * 注： nodesTypeObj的key 与 src\views\modelMan\data\index.ts中的modelItemDatas id 一一对应
  */
-const nodesTypeObj: any = {
-  '10000': StartNode, // 开始节点
-  '10002': BigModelNode, // 大模型节点
-  '10004': KnowledgeNode, // 知识模型节点
-  '10007': ConditionNode, // 条件节点
-  '10008': TextNode, // 文本节点
-  '20000': EndNode // 结束节点
-};
+let nodesTypeObj: any = {};
 const changeEdgeParams = (edge:GraphEdge,payload:any) => {
   const newEdge = {
     ...edge,
@@ -149,7 +138,7 @@ const addStartNode = () => {
     id: nodeId + '-' + (vueFlowNodeId++) + '',
     targetPosition: Position.Left,
     sourcePosition: Position.Right,
-    label: markRaw(nodesTypeObj[nodeId]),
+    label: markRaw(StartNode),
     position: { x: 100, y: dimensions.value.height / 4 },
     // position: { x: Math.random() * dimensions.value.width, y: Math.random() * dimensions.value.height },
   });
@@ -161,12 +150,26 @@ const addEndNode = () => {
     targetPosition: Position.Left,
     sourcePosition: Position.Right,
     deletable: true,
-    label: markRaw(nodesTypeObj[nodeId]),
+    label: markRaw(EndNode),
     position: { x: 775 + 100 + 200, y: dimensions.value.height / 4 },
   })
 }
-const addRandomNode = (nodeId: string, position: any) => {
+const init = async() => {
+  if(Object.keys(nodesTypeObj).length>0){ // 已经初始化直接返回
+    return;
+  }
+  nodesTypeObj = {
+    // '10000': StartNode, // 开始节点
+    '10002': (await import('./models/BigModelNode.vue')).default, // 大模型节点
+    '10004': (await import('./models/KnowledgeNode.vue')).default, // 知识模型节点
+    '10007': (await import('./models/ConditionNode.vue')).default, // 条件节点
+    '10008': (await import('./models/TextNode.vue')).default, // 文本节点
+    // '20000': EndNode // 结束节点
+  }
+}
+const addRandomNode = async(nodeId: string, position: any) => {
   collectNodes();
+  await init();
   if (!nodesTypeObj[nodeId]) {
     ElMessage({
       message: '此节点类型还在建设中...',
