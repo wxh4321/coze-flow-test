@@ -10,6 +10,9 @@
 coze 工作流 官网截图，2024年版本
 ![coze_png](./images/coze-page.jpg)
 
+coze demo地址
+[coze demo](https://wxh4321.github.io/coze-flow-test/#/work_flow)
+
 ## 安装教程
 1. 安装pnpm：npm install -g pnpm
 2. Node.js版本要求：v18.12.0 或更高
