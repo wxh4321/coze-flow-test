@@ -37,10 +37,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: yarn -v
-      - run: yarn
+      - run: pnpm -v
+      - run: pnpm install
       - name: Build
-        run: yarn build
+        run: pnpm build
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
